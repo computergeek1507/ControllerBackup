@@ -2,8 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSettings>
 
-#include "cape_info.h"
+#include "ControllerManager.h"
 
 #include "spdlog/spdlog.h"
 #include "spdlog/common.h"
@@ -17,7 +18,6 @@ namespace Ui { class MainWindow; }
 class QListWidgetItem;
 class QListWidget;
 class QTableWidget;
-class QSettings;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -30,33 +30,27 @@ public:
 
 public Q_SLOTS:
 
-    void on_actionOpen_EEPROM_triggered();
-    void on_actionDownload_EEPROM_triggered();
+    void on_actionSetShowFolder_triggered();
     void on_actionClose_triggered();
 
     void on_actionAbout_triggered();
     void on_actionOpen_Logs_triggered();
 
-    void on_menuRecent_triggered();
-    void on_actionClear_triggered();
+    void on_pbBackupFolder_clicked();
+    void on_pb_backup_clicked();
 
-    void RedrawStringPortList(QString const& string);
+    void RedrawControllerList();
+    void RedrawFolder(QString const& folder);
 
     void LogMessage(QString const& message , spdlog::level::level_enum llvl = spdlog::level::level_enum::debug);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *m_ui;
+    std::shared_ptr<spdlog::logger> m_logger{ nullptr };
+    std::unique_ptr<QSettings> m_settings{ nullptr };
+    QString m_appdir;
 
-    std::shared_ptr<spdlog::logger> logger{ nullptr };
-    std::unique_ptr<QSettings> settings{ nullptr };
-    QString appdir;
-
-    cape_info m_cape;
-
-    void ReadCapeInfo(QString const& file);
-    void CreateStringsList(QString const& folder);
-    void ReadGPIOFile(QString const& folder);
-    void ReadOtherFile(QString const& folder);
+    std::unique_ptr<ControllerManager> m_manager{ nullptr };
 
 };
 #endif // MAINWINDOW_H

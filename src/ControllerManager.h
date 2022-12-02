@@ -1,7 +1,7 @@
 #ifndef CONTROLLERMANAGER_H
 #define CONTROLLERMANAGER_H
 
-#include "BaseOutput.h"
+#include "BaseController.h"
 
 #include "spdlog/spdlog.h"
 
@@ -18,18 +18,19 @@ class ControllerManager: public QObject
 public:
 
     ControllerManager();
-    bool LoadOutputs(QString const& outputConfig);
+    bool LoadControllers(QString const& outputConfig);
 
-    bool OpenOutputs();
-    void CloseOutputs();
-    void OutputData(uint8_t* data);
+    bool BackUpControllerConfigs(QString const& folder);
+
+    [[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
+    [[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };
 
 Q_SIGNALS:
-    void AddController(bool enabled, QString const& type, QString const& ip, QString const& channels);
-    void SetChannelCount(uint64_t channels);
+    void ReloadControllers();
+    void ReloadSetFolder(QString const& folder);
 
 private:
-    std::vector<std::unique_ptr<BaseOutput>> m_outputs;
+    std::vector<std::unique_ptr<BaseController>> m_controllers;
     std::shared_ptr<spdlog::logger> m_logger{ nullptr };
 };
 

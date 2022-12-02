@@ -27,132 +27,82 @@
       <property name="verticalSpacing">
        <number>3</number>
       </property>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="leProject">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Backup Folder:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="leBackupFolder">
         <property name="readOnly">
          <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
+      <item row="1" column="2">
+       <widget class="QPushButton" name="pbBackupFolder">
         <property name="text">
-         <string>Cape:</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="ControllerBackup.qrc">
+          <normaloff>:/ControllerBackup/icons/folder.png</normaloff>:/ControllerBackup/icons/folder.png</iconset>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
+     <widget class="QTableWidget" name="twControllers">
+      <property name="columnCount">
+       <number>4</number>
       </property>
-      <widget class="QWidget" name="tabStringPorts">
-       <attribute name="title">
-        <string>String Ports</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QComboBox" name="comboBoxCape"/>
-        </item>
-        <item>
-         <widget class="QTableWidget" name="twParts">
-          <property name="columnCount">
-           <number>2</number>
-          </property>
-          <attribute name="verticalHeaderMinimumSectionSize">
-           <number>25</number>
-          </attribute>
-          <attribute name="verticalHeaderDefaultSectionSize">
-           <number>30</number>
-          </attribute>
-          <column>
-           <property name="text">
-            <string>String Ports</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>GPIO</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabSerial">
-       <attribute name="title">
-        <string>Other Ports</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QTableWidget" name="twOther">
-          <column>
-           <property name="text">
-            <string>Type</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Device</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabGPIO">
-       <attribute name="title">
-        <string>GPIO Inputs</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QTableWidget" name="twGPIO">
-          <column>
-           <property name="text">
-            <string>Pin</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Mode</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Description</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Type</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Command</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Args</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabCapeInfo">
-       <attribute name="title">
-        <string>Cape Info</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QTextEdit" name="textEditCapeInfo"/>
-        </item>
-       </layout>
-      </widget>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>30</number>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>25</number>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>IP Address</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Status</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pb_backup">
+      <property name="text">
+       <string>Backup</string>
+      </property>
+      <property name="icon">
+       <iconset resource="ControllerBackup.qrc">
+        <normaloff>:/ControllerBackup/icons/drive.png</normaloff>:/ControllerBackup/icons/drive.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="lblShowFolder">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
      </widget>
     </item>
    </layout>
@@ -163,22 +113,14 @@
      <x>0</x>
      <y>0</y>
      <width>1046</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="menuRecent">
-     <property name="title">
-      <string>Recent</string>
-     </property>
-     <addaction name="actionClear"/>
-    </widget>
-    <addaction name="actionOpen_EEPROM"/>
-    <addaction name="actionDownload_EEPROM"/>
-    <addaction name="menuRecent"/>
+    <addaction name="actionSetShowFolder"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
@@ -211,13 +153,13 @@
     <string>Open Logs...</string>
    </property>
   </action>
-  <action name="actionOpen_EEPROM">
+  <action name="actionSetShowFolder">
    <property name="icon">
     <iconset resource="ControllerBackup.qrc">
      <normaloff>:/ControllerBackup/icons/folder.png</normaloff>:/ControllerBackup/icons/folder.png</iconset>
    </property>
    <property name="text">
-    <string>Open EEPROM...</string>
+    <string>Set Show Folder...</string>
    </property>
   </action>
   <action name="actionOpen_Explorer">
