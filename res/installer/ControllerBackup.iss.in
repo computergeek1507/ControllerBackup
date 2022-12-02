@@ -10,7 +10,7 @@ AppName={#MyTitleName}
 AppVersion={#Version}
 DefaultDirName={commonpf64}\{#MyTitleName}
 DefaultGroupName={#MyTitleName}
-SetupIconFile=..\CapeEEPROMViewer.ico
+SetupIconFile=..\@PROJECT_NAME@.ico
 ChangesAssociations = yes
 UninstallDisplayIcon={app}\{#MyTitleName}.exe
 Compression=lzma2
@@ -23,7 +23,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "D
 
 [Files]
 Source: "..\..\cmake_vs\Release\{#MyTitleName}.exe"; DestDir: "{app}"
-Source: "..\CapeEEPROMViewer.ico"; DestDir: "{app}"
+Source: "..\@PROJECT_NAME@.ico"; DestDir: "{app}"
 Source: "..\..\cmake_vs\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\cmake_vs\Release\platforms\*.dll"; DestDir: "{app}\platforms\"; Flags: ignoreversion  
 Source: "..\..\cmake_vs\Release\imageformats\*.dll"; DestDir: "{app}\imageformats\"; Flags: ignoreversion
