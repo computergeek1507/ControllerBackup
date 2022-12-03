@@ -9,8 +9,9 @@
 struct FalconV3Controller : BaseController
 {
 	FalconV3Controller(QString name, QString  ip): BaseController(std::move(name), std::move(ip)) {}
-	void BackUpConfig(QString const& folder) const override;
+	QString BackUpConfig(QString const& folder) const override;
 	QString GetType() const override{ return "FalconV3"; };
+	QString GetFileName() const override;
 
 };
 

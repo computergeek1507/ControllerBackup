@@ -71,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_manager = std::make_unique<ControllerManager>();
 	connect(m_manager.get(), &ControllerManager::ReloadControllers, this, &MainWindow::RedrawControllerList);
 	connect(m_manager.get(), &ControllerManager::ReloadSetFolder, this, &MainWindow::RedrawFolder);
+	connect(m_manager.get(), &ControllerManager::UpdateControllerStatus, this, &MainWindow::UpdateStatus);
 
 	auto lastfolder{ m_settings->value("last_folder").toString() };
 	auto backupfolder{ m_settings->value("backup_folder").toString() };
@@ -101,7 +102,6 @@ void MainWindow::on_actionSetShowFolder_triggered()
 	QString const folder = dialog.getExistingDirectory(this, "Select xLight Show Folder", lastfolder, QFileDialog::ShowDirsOnly);
 	if (!folder.isEmpty() && QDir(folder).exists())
 	{
-		//ClearListData();
 		m_manager->LoadControllers(folder);
 		m_settings->setValue("last_folder", folder);
 		m_settings->sync();
@@ -127,6 +127,23 @@ void MainWindow::on_actionOpen_Logs_triggered()
 	QDesktopServices::openUrl(QUrl::fromLocalFile(m_appdir + "/log/"));
 }
 
+void MainWindow::on_twControllers_cellDoubleClicked(int row, int column)
+{
+	if (column == std::to_underlying(ControllerColumn::IP_Address) || column == std::to_underlying(ControllerColumn::Name))
+	{
+		auto ip{ m_ui->twControllers->item(row, std::to_underlying(ControllerColumn::IP_Address))->text() };
+		QDesktopServices::openUrl(QUrl("http://" + ip));
+	}
+	else if (column == std::to_underlying(ControllerColumn::Status))
+	{
+		auto file = m_ui->twControllers->item(row, std::to_underlying(ControllerColumn::Status))->data(Qt::UserRole).toString();
+		if (QFile::exists(file)) 
+		{
+			QDesktopServices::openUrl(QUrl::fromLocalFile(file));
+		}
+	}
+}
+
 void MainWindow::RedrawControllerList()
 {
 	m_ui->twControllers->clearContents();
@@ -146,7 +163,7 @@ void MainWindow::RedrawControllerList()
 		SetItem(idx, ControllerColumn::Name, c->Name);
 		SetItem(idx, ControllerColumn::IP_Address, c->IP);
 		SetItem(idx, ControllerColumn::Type, c->GetType());
-		//SetItem(idx, ScheduleColumn::StartDate, shed.StartDate.toString());
+		SetItem(idx, ControllerColumn::Status, QString());
 	}
 	
 	m_ui->twControllers->resizeColumnsToContents();
@@ -189,4 +206,22 @@ void MainWindow::LogMessage(QString const& message, spdlog::level::level_enum ll
 void MainWindow::RedrawFolder(QString const& folder)
 {
 	m_ui->lblShowFolder->setText(folder);
+}
+
+void MainWindow::UpdateStatus(QString const& ip, QString const& filePath)
+{
+	m_ui->twControllers->setRowCount(static_cast<int>(m_manager->GetControllerSize()));
+
+	for (size_t idx = 0; idx < m_ui->twControllers->rowCount(); ++idx)
+	{
+		auto cellip = m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::IP_Address))->text();
+		if(cellip == ip)
+		{
+			QFileInfo info(filePath);
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText("Saved: " + info.fileName());
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, filePath);
+			m_ui->twControllers->resizeColumnsToContents();
+			return;
+		}
+	}
 }

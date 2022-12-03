@@ -1,8 +1,8 @@
 #include "GeniusController.h"
 
-void GeniusController::BackUpConfig(QString const& folder) const 
+QString GeniusController::BackUpConfig(QString const& folder) const
 {
-	auto json = DownloadJson("http://" + IP + GetConfigURL());
-	SaveJson(json, folder);
+	auto json = DownloadData("http://" + IP + GetConfigURL());
+	return SaveData(json.toLatin1(), folder);
 }
  

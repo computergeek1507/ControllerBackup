@@ -1,11 +1,12 @@
 #include "BaseController.h"
 
-#include <QJsonDocument>
-#include <QJsonObject>
+
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QFile>
 #include <QDir>
+#include <QElapsedTimer>
+#include <QCoreApplication>
 
 QString BaseController::GetFileName() const
 {
@@ -14,34 +15,68 @@ QString BaseController::GetFileName() const
 	return Name + "_" + ip + ".json";
 }
 
-QJsonObject BaseController::DownloadJson(QString const& url) const
+QString BaseController::DownloadData(QString const& url) const
 {
-    QNetworkAccessManager m_manager;
+	QNetworkAccessManager manager;
+	QNetworkRequest request(url);
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+	QNetworkReply* response = manager.get(request);
 
-    QNetworkRequest request = QNetworkRequest(QUrl(url));
-    QNetworkReply* reply = m_manager.get(request);
+	QElapsedTimer timer;
+	timer.start();
 
-    QObject::connect(reply, &QNetworkReply::finished, [reply]() {
+	while (!response->isFinished())
+	{
+		if (timer.elapsed() >= (5 * 1000))
+		{
+			response->abort();
+			return QString();
+		}
+		QCoreApplication::processEvents();
+	}
 
-        QString ReplyText = reply->readAll();
-        // qDebug() << ReplyText;
-        // ask doc to parse it
-        QJsonDocument doc = QJsonDocument::fromJson(ReplyText.toUtf8());
-        // we know first element in file is object, to try to ask for such
-        return doc.object();
-        reply->deleteLater(); // make sure to clean up
-    });
-
-    return QJsonObject();
+	auto content = response->readAll();
+	response->deleteLater();
+	return content;
 }
 
-void BaseController::SaveJson(QJsonObject const& json, QString const& backupfolder) const
+QString BaseController::DownloadData(QString const& url, QString const& post) const
 {
-    QFile saveFile(backupfolder + QString(QDir::separator()) + GetFileName());
+	//"application/json"
+	QNetworkAccessManager manager;
+	QNetworkRequest request(url);
+	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+	QNetworkReply* response = manager.post(request, post.toLatin1());
 
-    if (!saveFile.open(QIODevice::WriteOnly)) {
-        qWarning("Couldn't open save file.");
-        return;
-    }
-    saveFile.write(QJsonDocument(json).toJson());
+	QElapsedTimer timer;
+	timer.start();
+
+	while (!response->isFinished())
+	{
+		if (timer.elapsed() >= (5 * 1000))
+		{
+			response->abort();
+			return QString();
+		}
+		QCoreApplication::processEvents();
+	}
+
+	auto content = response->readAll();
+	response->deleteLater();
+	return content;
+}
+
+QString BaseController::SaveData(QByteArray const& fileData, QString const& backupfolder) const
+{
+	QString fileName{ backupfolder + QString(QDir::separator()) + GetFileName() };
+	QFile saveFile(fileName);
+
+	if (!saveFile.open(QIODevice::WriteOnly)) 
+	{
+		qWarning("Couldn't open save file.");
+		return QString();
+	}
+	saveFile.write(fileData);
+	return fileName;
 }

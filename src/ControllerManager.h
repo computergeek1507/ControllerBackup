@@ -13,25 +13,26 @@
 
 class ControllerManager: public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    ControllerManager();
-    bool LoadControllers(QString const& outputConfig);
+	ControllerManager();
+	bool LoadControllers(QString const& outputConfig);
 
-    bool BackUpControllerConfigs(QString const& folder);
+	bool BackUpControllerConfigs(QString const& folder);
 
-    [[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
-    [[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };
+	[[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
+	[[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };
 
 Q_SIGNALS:
-    void ReloadControllers();
-    void ReloadSetFolder(QString const& folder);
+	void ReloadControllers();
+	void ReloadSetFolder(QString const& folder);
+	void UpdateControllerStatus(QString const& ip, QString const& status);
 
 private:
-    std::vector<std::unique_ptr<BaseController>> m_controllers;
-    std::shared_ptr<spdlog::logger> m_logger{ nullptr };
+	std::vector<std::unique_ptr<BaseController>> m_controllers;
+	std::shared_ptr<spdlog::logger> m_logger{ nullptr };
 };
 
 #endif

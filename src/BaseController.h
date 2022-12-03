@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QString>
-#include <QJsonObject>
+
 
 #include <memory>
 
@@ -14,11 +14,12 @@ public:
 	
 	BaseController(QString name, QString  ip): Name(std::move(name)), IP(std::move(ip))
 	{}
-	virtual void BackUpConfig(QString const& folder) const = 0;
-	virtual QString GetType() const = 0;
-	virtual QString GetFileName() const;
-	QJsonObject DownloadJson(QString const& url) const;
-	void SaveJson(QJsonObject const& json, QString const& backupfolder) const;
+	[[nodiscard]] virtual QString BackUpConfig(QString const& folder) const = 0;
+	[[nodiscard]] virtual QString GetType() const = 0;
+	[[nodiscard]] virtual QString GetFileName() const;
+	[[nodiscard]] QString DownloadData(QString const& url) const;
+	[[nodiscard]] QString DownloadData(QString const& url, QString const& post) const;
+	[[nodiscard]] QString SaveData(QByteArray const& json, QString const& backupfolder) const;
 
 	QString Name;
 	QString IP;

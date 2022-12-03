@@ -1,9 +1,14 @@
 #include "FPPController.h"
 
-void FPPController::BackUpConfig(QString const& folder) const 
+QString FPPController::BackUpConfig(QString const& folder) const 
 {
+	auto stringurl = GetBBBStringsURL();
+	if ("Pi Hat" == Model)
+	{
+		stringurl = GetPIStringsURL();
+	}
 	///fppjson.php?command=getChannelOutputs&file=co-bbbStrings
-	auto json = DownloadJson("http://" + IP + GetBBBStringsURL());
-	SaveJson(json, folder);
+	auto json = DownloadData("http://" + IP + stringurl);
+	return SaveData(json.toLatin1(), folder);
 }
  

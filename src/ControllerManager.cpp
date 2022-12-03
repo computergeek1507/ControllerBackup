@@ -18,7 +18,8 @@ bool ControllerManager::BackUpControllerConfigs(QString const& folder)
 {
 	for (auto const& c : m_controllers)
 	{
-		c->BackUpConfig(folder);
+		auto file = c->BackUpConfig(folder);
+		emit UpdateControllerStatus(c->IP, file);
 	}
 	return true;
 }
@@ -46,17 +47,17 @@ bool ControllerManager::LoadControllers(QString const& outputConfig)
 		QString const vendor = controllerXML.attribute("Vendor", "");
 		QString const model = controllerXML.attribute("Model", "");
 		QString const ipAddress = controllerXML.attribute("IP", "");
-		if ("Falcon" == vendor && (type == "F16V4" || type == "F48V4"))
+		if ("Falcon" == vendor && (model == "F16V4" || model == "F48V4"))
 		{
 			m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
 		}
-		else if ("Falcon" == vendor && (type == "F16V3" || type == "F48"))
+		else if ("Falcon" == vendor && (model == "F16V3" || model == "F48"))
 		{
 			m_controllers.emplace_back(std::make_unique<FalconV3Controller>(name, ipAddress));
 		}
 		else if ("FPP" == vendor || "ScottNation" == vendor || "KulpLights" == vendor)
 		{
-			m_controllers.emplace_back(std::make_unique<FPPController>(name, ipAddress));
+			m_controllers.emplace_back(std::make_unique<FPPController>(name, ipAddress, vendor, model));
 		}
 		else if ("Experience Lights" == vendor)
 		{
