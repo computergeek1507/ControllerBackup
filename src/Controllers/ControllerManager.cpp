@@ -6,6 +6,8 @@
 #include "GeniusController.h"
 #include "WLEDController.h"
 
+#include "BackupVisitor.h"
+
 #include <QtXml>
 #include <QFile>
 
@@ -16,10 +18,11 @@ ControllerManager::ControllerManager():
 
 bool ControllerManager::BackUpControllerConfigs(QString const& folder)
 {
+	std::unique_ptr<BackupVisitor> visitor = std::make_unique< BackupVisitor>(folder);
 	for (auto const& c : m_controllers)
 	{
-		auto file = c->BackUpConfig(folder);
-		emit UpdateControllerStatus(c->IP, file);
+		c->accept(visitor.get());
+		emit UpdateControllerStatus(c->IP, visitor->BackUpPath);
 	}
 	return true;
 }

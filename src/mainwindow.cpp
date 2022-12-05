@@ -23,6 +23,8 @@
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 
+#include "backup_viewer/backup_viewer.h"
+
 #include "spdlog/spdlog.h"
 
 #include "spdlog/sinks/qt_sinks.h"
@@ -129,7 +131,11 @@ void MainWindow::on_actionOpen_Logs_triggered()
 
 void MainWindow::on_twControllers_cellDoubleClicked(int row, int column)
 {
-	if (column == std::to_underlying(ControllerColumn::IP_Address) || column == std::to_underlying(ControllerColumn::Name))
+	if (column == std::to_underlying(ControllerColumn::Name))
+	{
+		BackUpViewer::Load(m_manager->GetController(row), this);
+	}
+	else if (column == std::to_underlying(ControllerColumn::IP_Address))
 	{
 		auto ip{ m_ui->twControllers->item(row, std::to_underlying(ControllerColumn::IP_Address))->text() };
 		QDesktopServices::openUrl(QUrl("http://" + ip));

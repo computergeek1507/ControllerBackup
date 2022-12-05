@@ -19,32 +19,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableWidget" name="twInputs">
-     <column>
-      <property name="text">
-       <string>Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Details</string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTableWidget" name="twOutputs">
-     <column>
-      <property name="text">
-       <string>Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Details</string>
-      </property>
-     </column>
-    </widget>
+    <widget class="QTextEdit" name="textEdit"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

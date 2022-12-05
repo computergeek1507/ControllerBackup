@@ -1,14 +1,10 @@
 #include "FPPController.h"
 
-QString FPPController::BackUpConfig(QString const& folder) const 
+void FPPController::accept(BackupVisitor * v)
 {
-	auto stringurl = GetBBBStringsURL();
-	if ("Pi Hat" == Model)
-	{
-		stringurl = GetPIStringsURL();
-	}
-	///fppjson.php?command=getChannelOutputs&file=co-bbbStrings
-	auto json = DownloadData("http://" + IP + stringurl);
-	return SaveData(json.toLatin1(), folder);
+	v->BackUpFPP(this);
 }
- 
+void FPPController::accept(ViewerVisitor * v)
+{
+	v->DisplayOuputs(this);
+}

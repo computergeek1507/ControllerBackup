@@ -1,8 +1,12 @@
 #include "GeniusController.h"
+#include "BackupVisitor.h"
+#include "../backup_viewer/viewer_visitor.h"
 
-QString GeniusController::BackUpConfig(QString const& folder) const
+void GeniusController::accept(BackupVisitor * v)
 {
-	auto json = DownloadData("http://" + IP + GetConfigURL());
-	return SaveData(json.toLatin1(), folder);
+	v->BackUpGenius(this);
 }
- 
+void GeniusController::accept(ViewerVisitor * v)
+{
+	v->DisplayOuputs(this);
+}

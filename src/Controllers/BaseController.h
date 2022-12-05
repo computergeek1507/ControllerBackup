@@ -3,9 +3,10 @@
 
 #include <QObject>
 #include <QString>
-
-
 #include <memory>
+
+class ViewerVisitor;
+class BackupVisitor;
 
 struct BaseController: public QObject
 {
@@ -14,15 +15,14 @@ public:
 	
 	BaseController(QString name, QString  ip): Name(std::move(name)), IP(std::move(ip))
 	{}
-	[[nodiscard]] virtual QString BackUpConfig(QString const& folder) const = 0;
 	[[nodiscard]] virtual QString GetType() const = 0;
 	[[nodiscard]] virtual QString GetFileName() const;
-	[[nodiscard]] QString DownloadData(QString const& url) const;
-	[[nodiscard]] QString DownloadData(QString const& url, QString const& post) const;
-	[[nodiscard]] QString SaveData(QByteArray const& json, QString const& backupfolder) const;
+	virtual void accept(BackupVisitor * v) = 0;
+	virtual void accept(ViewerVisitor * v) = 0;
 
 	QString Name;
 	QString IP;
+	QString FilePath;
 };
 
 #endif

@@ -1,10 +1,14 @@
 #include "FalconV3Controller.h"
 
-QString FalconV3Controller::BackUpConfig(QString const& folder) const
+
+void FalconV3Controller::accept(BackupVisitor * v)
 {
-	//http://192.168.5.217/settings.xml
-	auto json = DownloadData("http://" + IP + "/settings.xml");
-	return SaveData(json.toLatin1(), folder);
+	v->BackUpFalconV3(this);
+}
+
+void FalconV3Controller::accept(ViewerVisitor * v)
+{
+	v->DisplayOuputs(this);
 }
 
 QString FalconV3Controller::GetFileName() const

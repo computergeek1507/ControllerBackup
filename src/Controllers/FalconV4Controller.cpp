@@ -3,24 +3,13 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-QString FalconV4Controller::BackUpConfig(QString const& folder) const
+void FalconV4Controller::accept(BackupVisitor * v)
 {
-	QJsonObject controllerObject;
-	//"Q", "SP", batch, 0, 0,
-
-	QString url = "http://" + IP + GetAPI();
-
-	controllerObject.insert("C", GetReturnParm(DownloadData(url, BuildParm("Q", "ST"))));
-	controllerObject.insert("I", GetReturnParm(DownloadData(url, BuildParm("Q", "IN"))));
-	controllerObject.insert("S", GetReturnParm(DownloadData(url, BuildParm("Q", "SP"))));
-
-	controllerObject.insert("SC", GetReturnParm(DownloadData(url, BuildParm("Q", "SC"))));
-	controllerObject.insert("P", GetReturnParm(DownloadData(url, BuildParm("Q", "IP"))));
-
-	//{"T":"Q","M":"IN","B":0,"E":0,"I":0,"P":{}}
-	QJsonDocument doc(controllerObject);
-	//qDebug() << doc.toJson();
-	return SaveData(doc.toJson(), folder);
+	v->BackUpFalconV4(this);
+}
+void FalconV4Controller::accept(ViewerVisitor * v)
+{
+	v->DisplayOuputs(this);
 }
 
 QString FalconV4Controller::BuildParm(QString const& type, QString const& method) const

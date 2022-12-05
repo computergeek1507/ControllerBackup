@@ -1,8 +1,13 @@
 #include "WLEDController.h"
 
-QString WLEDController::BackUpConfig(QString const& folder) const
+#include "BackupVisitor.h"
+#include "../backup_viewer/viewer_visitor.h"
+
+void WLEDController::accept(BackupVisitor * v)
 {
-	auto json = DownloadData("http://" + IP + GetCfgURL());
-	return SaveData(json.toLatin1(), folder);
+	v->BackUpWLED(this);
 }
- 
+void WLEDController::accept(ViewerVisitor * v)
+{
+	v->DisplayOuputs(this);
+}
