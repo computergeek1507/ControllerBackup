@@ -1,7 +1,7 @@
 #ifndef CONTROLLERMANAGER_H
 #define CONTROLLERMANAGER_H
 
-#include "Controllers/BaseController.h"
+#include "BaseController.h"
 
 #include "spdlog/spdlog.h"
 

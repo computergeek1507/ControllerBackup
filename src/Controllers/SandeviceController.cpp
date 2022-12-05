@@ -1,8 +1,9 @@
-#include "WLEDController.h"
+#include "SandeviceController.h"
 
-QString WLEDController::BackUpConfig(QString const& folder) const
+QString SandeviceController::BackUpConfig(QString const& folder) const
 {
-	auto json = DownloadData("http://" + IP + GetCfgURL());
-	return SaveData(json.toLatin1(), folder);
+	//page = SDGetURL("/");
+	auto html = DownloadData("http://" + IP + "/");
+	return SaveData(html.toLatin1(), folder);
 }
  

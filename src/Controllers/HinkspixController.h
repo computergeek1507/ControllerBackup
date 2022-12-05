@@ -12,8 +12,9 @@ struct HinkspixController : BaseController
 	QString BackUpConfig(QString const& folder) const override;
 	QString GetType() const override{ return "Hinkspix"; };
 
-    static const QString GetInfoURL() { return"/json/info"; };
-    static const QString GetCfgURL() { return"/json/cfg"; };
+    static const QString GetJSONInfoURL() { return "/XLights_BoardInfo.cgi"; };
+    static const QString GetJSONPortURL() { return "/Xlights_Board_Port_Config.cgi"; };
+    static const QString GetJSONModeURL() { return "/Xlights_Data_Mode.cgi"; };
 };
 
 #endif

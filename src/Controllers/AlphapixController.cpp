@@ -2,7 +2,8 @@
 
 QString AlphapixController::BackUpConfig(QString const& folder) const
 {
-	auto json = DownloadData("http://" + IP + GetCfgURL());
-	return SaveData(json.toLatin1(), folder);
+	//_page = GetURL("/");
+	auto html = DownloadData("http://" + IP + "/");
+	return SaveData(html.toLatin1(), folder);
 }
  

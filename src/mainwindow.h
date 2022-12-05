@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QSettings>
 
-#include "ControllerManager.h"
+#include "Controllers/ControllerManager.h"
 
 #include "spdlog/spdlog.h"
 #include "spdlog/common.h"

@@ -4,6 +4,7 @@
 #include "FalconV4Controller.h"
 #include "FPPController.h"
 #include "GeniusController.h"
+#include "WLEDController.h"
 
 #include <QtXml>
 #include <QFile>
@@ -11,7 +12,6 @@
 ControllerManager::ControllerManager():
 		m_logger(spdlog::get("ControllerBackup"))
 {
-
 }
 
 bool ControllerManager::BackUpControllerConfigs(QString const& folder)
@@ -62,6 +62,10 @@ bool ControllerManager::LoadControllers(QString const& outputConfig)
 		else if ("Experience Lights" == vendor)
 		{
 			m_controllers.emplace_back(std::make_unique<GeniusController>(name, ipAddress));
+		}
+		else if ("WLED" == vendor)
+		{
+			m_controllers.emplace_back(std::make_unique<WLEDController>(name, ipAddress));
 		}
 		else
 		{
