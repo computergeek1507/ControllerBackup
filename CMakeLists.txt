@@ -42,8 +42,10 @@ file( GLOB_RECURSE BASE_RES res/*ui res/*qrc)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 qt6_wrap_ui(BASE_SRC res/mainwindow.ui)
+qt6_wrap_ui(BASE_SRC res/backupviewer.ui)
 else()
 qt5_wrap_ui(BASE_SRC res/mainwindow.ui)
+qt5_wrap_ui(BASE_SRC res/backupviewer.ui)
 endif()
 
 
