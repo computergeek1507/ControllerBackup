@@ -26,15 +26,15 @@ struct BackupVisitor
     BackupVisitor(QString folder) : Folder(folder)
     {}
 
-    void BackUpFalconV3(FalconV3Controller* c);
+    void BackUp(FalconV3Controller* c);
     
-    void BackUpFalconV4(FalconV4Controller* c);
+    void BackUp(FalconV4Controller* c);
 
-    void BackUpFPP(FPPController* c);
+    void BackUp(FPPController* c);
 
-    void BackUpGenius(GeniusController* c);
+    void BackUp(GeniusController* c);
 
-    void BackUpWLED(WLEDController* c);
+    void BackUp(WLEDController* c);
 
     [[nodiscard]] QString DownloadData(QString const& url) const;
 	[[nodiscard]] QString DownloadData(QString const& url, QString const& post) const;

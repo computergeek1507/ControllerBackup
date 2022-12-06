@@ -4,7 +4,7 @@
 
 void GeniusController::accept(BackupVisitor * v)
 {
-	v->BackUpGenius(this);
+	v->BackUp(this);
 }
 void GeniusController::accept(ViewerVisitor * v)
 {

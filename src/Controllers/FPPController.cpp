@@ -2,7 +2,7 @@
 
 void FPPController::accept(BackupVisitor * v)
 {
-	v->BackUpFPP(this);
+	v->BackUp(this);
 }
 void FPPController::accept(ViewerVisitor * v)
 {

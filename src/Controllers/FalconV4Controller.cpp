@@ -5,7 +5,7 @@
 
 void FalconV4Controller::accept(BackupVisitor * v)
 {
-	v->BackUpFalconV4(this);
+	v->BackUp(this);
 }
 void FalconV4Controller::accept(ViewerVisitor * v)
 {

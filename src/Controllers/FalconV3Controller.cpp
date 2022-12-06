@@ -3,7 +3,7 @@
 
 void FalconV3Controller::accept(BackupVisitor * v)
 {
-	v->BackUpFalconV3(this);
+	v->BackUp(this);
 }
 
 void FalconV3Controller::accept(ViewerVisitor * v)

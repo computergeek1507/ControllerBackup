@@ -5,7 +5,7 @@
 
 void WLEDController::accept(BackupVisitor * v)
 {
-	v->BackUpWLED(this);
+	v->BackUp(this);
 }
 void WLEDController::accept(ViewerVisitor * v)
 {

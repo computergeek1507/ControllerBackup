@@ -13,14 +13,14 @@
 #include <QElapsedTimer>
 #include <QCoreApplication>
 
-void BackupVisitor::BackUpFalconV3(FalconV3Controller* c)
+void BackupVisitor::BackUp(FalconV3Controller* c)
 {
     auto json = DownloadData("http://" + c->IP + "/settings.xml");
 	SaveData(json.toLatin1(), Folder, c->GetFileName());
 	c->FilePath = BackUpPath;
 }
 
-void BackupVisitor::BackUpFalconV4(FalconV4Controller* c)
+void BackupVisitor::BackUp(FalconV4Controller* c)
 {
     QJsonObject controllerObject;
     //"Q", "SP", batch, 0, 0,
@@ -41,7 +41,7 @@ void BackupVisitor::BackUpFalconV4(FalconV4Controller* c)
 	c->FilePath = BackUpPath;
 }
 
-void BackupVisitor::BackUpFPP(FPPController* c)
+void BackupVisitor::BackUp(FPPController* c)
 {
     auto stringurl = c->GetBBBStringsURL();
 	if ("Pi Hat" == c->Model)
@@ -54,14 +54,14 @@ void BackupVisitor::BackUpFPP(FPPController* c)
 	c->FilePath = BackUpPath;
 }
 
-void BackupVisitor::BackUpGenius(GeniusController* c)
+void BackupVisitor::BackUp(GeniusController* c)
 {
     auto json = DownloadData("http://" + c->IP + c->GetConfigURL());
 	SaveData(json.toLatin1(), Folder, c->GetFileName());
 	c->FilePath = BackUpPath;
 }
 
-void BackupVisitor::BackUpWLED(WLEDController* c)
+void BackupVisitor::BackUp(WLEDController* c)
 {
     auto json = DownloadData("http://" + c->IP + c->GetCfgURL());
 	SaveData(json.toLatin1(), Folder, c->GetFileName());
