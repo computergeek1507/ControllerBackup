@@ -18,6 +18,7 @@ BackUpViewer::BackUpViewer(BaseController * controller, QWidget* parent ) :
     QDialog( parent )
 {
     m_ui.setupUi( this );
+	connect(m_ui.buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 	std::unique_ptr<ViewerVisitor> visitor = std::make_unique< ViewerVisitor>();
 
 	controller->accept(visitor.get());
