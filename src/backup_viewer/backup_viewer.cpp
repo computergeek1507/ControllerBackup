@@ -1,6 +1,6 @@
 #include "backup_viewer.h"
 
-#include "../controllers/BaseController.h"
+#include "../Controllers/BaseController.h"
 #include "viewer_visitor.h"
 
 bool BackUpViewer::Load(BaseController * controller, QWidget* parent)
