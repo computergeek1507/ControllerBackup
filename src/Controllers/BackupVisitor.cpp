@@ -122,6 +122,11 @@ QString BackupVisitor::DownloadData(QString const& url, QString const& post) con
 
 void BackupVisitor::SaveData(QByteArray const& fileData, QString const& backupfolder, QString const& fileName)
 {
+	if (fileData.isEmpty()) 
+	{
+		qWarning("data is empty.");
+		return;
+	}
 	QString filePath{ backupfolder + QString(QDir::separator()) + fileName };
 	QFile saveFile(filePath);
 

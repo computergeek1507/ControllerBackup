@@ -21,6 +21,7 @@ public:
 	bool LoadControllers(QString const& outputConfig);
 
 	bool BackUpControllerConfigs(QString const& folder);
+	bool BackUpControllerConfig(QString const& folder, int index);
 
 	[[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
 	[[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };

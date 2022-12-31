@@ -75,6 +75,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_manager.get(), &ControllerManager::ReloadSetFolder, this, &MainWindow::RedrawFolder);
 	connect(m_manager.get(), &ControllerManager::UpdateControllerStatus, this, &MainWindow::UpdateStatus);
 
+	m_ui->twControllers->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_ui->twControllers, &QTableWidget::customContextMenuRequested,	this, &MainWindow::customMenuRequested);
+
 	auto lastfolder{ m_settings->value("last_folder").toString() };
 	auto backupfolder{ m_settings->value("backup_folder").toString() };
 
@@ -201,6 +204,33 @@ void MainWindow::on_pb_backup_clicked()
 	else
 	{
 		QMessageBox::warning(this, "Backup Folder Doesn't Exist", "Backup Folder Doesn't Exist: '" + folder + "'");
+	}
+}
+
+void MainWindow::customMenuRequested(QPoint pos)
+{
+	QModelIndex index = m_ui->twControllers->indexAt(pos);
+	QMenu menu(this);
+
+	QAction* action1 = menu.addAction("Backup Controller");
+
+	QAction* selectedMenuItem = menu.exec(m_ui->twControllers->mapToGlobal(pos));
+	if (selectedMenuItem == nullptr)
+	{
+		return;
+	}
+
+	if (selectedMenuItem == action1)
+	{
+		auto folder = m_ui->leBackupFolder->text();
+		if (!folder.isEmpty() && QDir(folder).exists())
+		{
+			m_manager->BackUpControllerConfig(folder, m_ui->twControllers->currentRow());
+		}
+		else
+		{
+			QMessageBox::warning(this, "Backup Folder Doesn't Exist", "Backup Folder Doesn't Exist: '" + folder + "'");
+		}
 	}
 }
 

@@ -40,6 +40,7 @@ public Q_SLOTS:
 	void on_pb_backup_clicked();
 
 	void on_twControllers_cellDoubleClicked(int row, int column);
+	void customMenuRequested(QPoint pos);
 	void RedrawControllerList();
 	void RedrawFolder(QString const& folder);
 	void UpdateStatus(QString const& ip, QString const& filePath);

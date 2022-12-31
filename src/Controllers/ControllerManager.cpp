@@ -27,6 +27,16 @@ bool ControllerManager::BackUpControllerConfigs(QString const& folder)
 	return true;
 }
 
+bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
+{
+	std::unique_ptr<BackupVisitor> visitor = std::make_unique< BackupVisitor>(folder);	
+	auto c{ GetController(index) };
+
+	c->accept(visitor.get());
+	emit UpdateControllerStatus(c->IP, visitor->BackUpPath);
+	return true;
+}
+
 bool ControllerManager::LoadControllers(QString const& outputConfig)
 {
 	QDomDocument xmlNetworks;
