@@ -4,6 +4,7 @@
 #include "BaseController.h"
 #include "BackupVisitor.h"
 #include "../backup_viewer/viewer_visitor.h"
+#include "config_visitor.h"
 
 #include <QString>
 #include <memory>
@@ -16,6 +17,7 @@ struct FalconV3Controller : BaseController
 
 	void accept(BackupVisitor * v) override;
 	void accept(ViewerVisitor * v) override;
+	void accept(ConfigVisitor * v) override;
 };
 
 #endif

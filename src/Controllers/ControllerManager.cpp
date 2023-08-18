@@ -7,6 +7,7 @@
 #include "WLEDController.h"
 
 #include "BackupVisitor.h"
+#include "config_visitor.h"
 
 #include <QtXml>
 #include <QFile>
@@ -35,6 +36,18 @@ bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
 	c->accept(visitor.get());
 	emit UpdateControllerStatus(c->IP, visitor->BackUpPath);
 	return true;
+}
+
+void ControllerManager::UpdateXLightsController()
+{
+}
+
+void ControllerManager::UpdateXLightsController(int index)
+{
+	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();	
+	auto c{ GetController(index) };
+
+	c->accept(visitor.get());
 }
 
 bool ControllerManager::LoadControllers(QString const& outputConfig)

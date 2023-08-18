@@ -1,4 +1,5 @@
 #include "FalconV4Controller.h"
+#include "config_visitor.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -10,6 +11,11 @@ void FalconV4Controller::accept(BackupVisitor * v)
 void FalconV4Controller::accept(ViewerVisitor * v)
 {
 	v->DisplayOuputs(this);
+}
+
+void FalconV4Controller::accept(ConfigVisitor * v)
+{
+	v->ReadConfig(this);
 }
 
 QString FalconV4Controller::BuildParm(QString const& type, QString const& method) const

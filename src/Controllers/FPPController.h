@@ -23,6 +23,7 @@ struct FPPController : BaseController
 
 	void accept(BackupVisitor * v) override;
 	void accept(ViewerVisitor * v) override;
+	void accept(ConfigVisitor * v) override;
 };
 
 #endif

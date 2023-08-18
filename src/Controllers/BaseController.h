@@ -7,6 +7,7 @@
 
 class ViewerVisitor;
 class BackupVisitor;
+class ConfigVisitor;
 
 struct BaseController: public QObject
 {
@@ -19,6 +20,7 @@ public:
 	[[nodiscard]] virtual QString GetFileName() const;
 	virtual void accept(BackupVisitor * v) = 0;
 	virtual void accept(ViewerVisitor * v) = 0;
+	virtual void accept(ConfigVisitor * v) = 0;
 
 	QString Name;
 	QString IP;

@@ -113,7 +113,7 @@
      <x>0</x>
      <y>0</y>
      <width>1046</width>
-     <height>26</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -121,6 +121,7 @@
      <string>File</string>
     </property>
     <addaction name="actionSetShowFolder"/>
+    <addaction name="actionSetup_xLights_from_Configs"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
@@ -264,6 +265,11 @@
   <action name="actionDownload_EEPROM">
    <property name="text">
     <string>Download EEPROM...</string>
+   </property>
+  </action>
+  <action name="actionSetup_xLights_from_Configs">
+   <property name="text">
+    <string>Setup xLights from Configs</string>
    </property>
   </action>
  </widget>
