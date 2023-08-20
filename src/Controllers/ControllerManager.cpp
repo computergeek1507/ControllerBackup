@@ -8,6 +8,7 @@
 
 #include "BackupVisitor.h"
 #include "config_visitor.h"
+#include "../xlights/xlights_update.h"
 
 #include <QtXml>
 #include <QFile>
@@ -38,16 +39,28 @@ bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
 	return true;
 }
 
-void ControllerManager::UpdateXLightsController()
+void ControllerManager::UpdateXLightsController(QString const& folder )
 {
 }
 
-void ControllerManager::UpdateXLightsController(int index)
+void ControllerManager::UpdateXLightsController(QString const& folder, int index)
 {
-	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();	
-	auto c{ GetController(index) };
-
-	c->accept(visitor.get());
+	xLightsUpdate test;
+	std::vector<ControllerData> controllers;
+	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();
+	for (auto const& c : m_controllers)
+	{
+		if (QFile::exists(folder + QDir::separator() + c->GetFileName()))
+		{
+			c->FilePath = folder + QDir::separator() + c->GetFileName();
+		}
+		else
+		{
+			continue;
+		}
+		c->accept(visitor.get());
+	}
+	test.UpdateXlightsModels(visitor->controllers);
 }
 
 bool ControllerManager::LoadControllers(QString const& outputConfig)
@@ -97,6 +110,7 @@ bool ControllerManager::LoadControllers(QString const& outputConfig)
 		{
 			m_logger->warn("Unsupported Controller type: {}", vendor.toStdString());
 			//unsupported type
+			m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
 		}
 	}
 	emit ReloadSetFolder(outputConfig);

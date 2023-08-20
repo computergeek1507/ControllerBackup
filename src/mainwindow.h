@@ -31,6 +31,7 @@ public:
 public Q_SLOTS:
 
 	void on_actionSetShowFolder_triggered();
+	void on_actionSetup_xLights_from_Configs_triggered();
 	void on_actionClose_triggered();
 
 	void on_actionAbout_triggered();

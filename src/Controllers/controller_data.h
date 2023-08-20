@@ -42,6 +42,14 @@ struct ControllerData
 		return QString("Name:%1,IP Address:%2,Mode:%3")
 			.arg(name).arg(ip).arg(mode);
 	}
+
+	void clear()
+	{
+		pixelports.clear();
+		ip.clear();
+		name.clear();
+		mode.clear();
+	}
 };
 
 #endif

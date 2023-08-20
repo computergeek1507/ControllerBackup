@@ -23,8 +23,8 @@ public:
 	bool BackUpControllerConfigs(QString const& folder);
 	bool BackUpControllerConfig(QString const& folder, int index);
 
-	void UpdateXLightsController();
-	void UpdateXLightsController(int index);
+	void UpdateXLightsController(QString const& folder);
+	void UpdateXLightsController(QString const& folder, int index);
 
 	[[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
 	[[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };

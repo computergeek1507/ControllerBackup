@@ -113,6 +113,19 @@ void MainWindow::on_actionSetShowFolder_triggered()
 	}
 }
 
+void MainWindow::on_actionSetup_xLights_from_Configs_triggered()
+{
+	auto folder = m_ui->leBackupFolder->text();
+	if (!folder.isEmpty() && QDir(folder).exists())
+	{
+		m_manager->UpdateXLightsController(folder, m_ui->twControllers->currentRow());
+	}
+	else
+	{
+		QMessageBox::warning(this, "Backup Folder Doesn't Exist", "Backup Folder Doesn't Exist: '" + folder + "'");
+	}
+}
+
 void MainWindow::on_actionClose_triggered()
 {
 	close();

@@ -20,7 +20,7 @@ struct ConfigVisitor
 {
     QString Folder;
     //QString File;
-    ControllerData configData;
+    std::vector<ControllerData> controllers;
 
     void ReadConfig(FalconV3Controller* c);
 
