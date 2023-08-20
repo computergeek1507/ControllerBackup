@@ -1,7 +1,6 @@
 #include "xlightsconnection.h"
 
-#include <QCoreApplication.h>
-#include <QElapsedTimer.h>
+#include <QElapsedTimer>
 #include <QNetworkReply>
 #include <QJsonObject>
 #include <QJsonDocument>
