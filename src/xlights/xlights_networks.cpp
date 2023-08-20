@@ -1,4 +1,4 @@
-#include "xlights_rgbeffects.h"
+#include "xlights_networks.h"
 
 #include <QProgressDialog>
 #include <QThread>

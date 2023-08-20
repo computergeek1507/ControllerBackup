@@ -15,7 +15,7 @@ class xLightsNetworks : public QObject
 {
 	Q_OBJECT
 public:
-	explicit xLightsRGBEffects(QObject* parent = 0);
+	explicit xLightsNetworks(QObject* parent = 0);
 
 	bool LoadXML(QString const& xgbNetworks);
 
