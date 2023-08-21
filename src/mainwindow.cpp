@@ -118,7 +118,7 @@ void MainWindow::on_actionSetup_xLights_from_Configs_triggered()
 	auto folder = m_ui->leBackupFolder->text();
 	if (!folder.isEmpty() && QDir(folder).exists())
 	{
-		m_manager->UpdateXLightsController(folder, m_ui->twControllers->currentRow());
+		m_manager->UpdateXLightsController(folder);
 	}
 	else
 	{

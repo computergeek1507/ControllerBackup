@@ -39,11 +39,7 @@ bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
 	return true;
 }
 
-void ControllerManager::UpdateXLightsController(QString const& folder )
-{
-}
-
-void ControllerManager::UpdateXLightsController(QString const& folder, int index)
+void ControllerManager::UpdateXLightsController(QString const& folder)
 {
 	xLightsUpdate test;
 	std::vector<ControllerData> controllers;
