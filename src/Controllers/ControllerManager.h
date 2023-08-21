@@ -37,6 +37,7 @@ Q_SIGNALS:
 private:
 	std::vector<std::unique_ptr<BaseController>> m_controllers;
 	std::shared_ptr<spdlog::logger> m_logger{ nullptr };
+	QString m_showdir;
 };
 
 #endif

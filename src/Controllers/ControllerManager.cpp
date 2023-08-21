@@ -60,7 +60,7 @@ void ControllerManager::UpdateXLightsController(QString const& folder, int index
 		}
 		c->accept(visitor.get());
 	}
-	test.UpdateXlightsModels(visitor->controllers);
+	test.UpdateXlightsModels(visitor->controllers, m_showdir + QDir::separator() + "xlights_rgbeffects.xml", m_showdir + QDir::separator() + "xlights_networks.xml");
 }
 
 bool ControllerManager::LoadControllers(QString const& outputConfig)
@@ -71,6 +71,7 @@ bool ControllerManager::LoadControllers(QString const& outputConfig)
 	{
 		return false;
 	}
+	m_showdir = outputConfig;
 	xmlNetworks.setContent(&f);
 	f.close();
 

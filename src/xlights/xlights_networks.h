@@ -18,13 +18,19 @@ public:
 	explicit xLightsNetworks(QObject* parent = 0);
 
 	bool LoadXML(QString const& xgbNetworks);
+	bool SaveXML(QString const& xgbNetworks);
 
-	void SetController(QString const& ip, QString const& vendor, QString const& model, QString const& variant);
+	bool SetController(QString const& ip, QString const& vendor, QString const& model, QString const& variant);
+
+	QStringList GetControllerIPs() const;
+	QStringList GetControllerNames() const;
+	QMap<QString, QString> GetControllerIPMap() const;
 
 private:
 	std::shared_ptr<spdlog::logger> m_logger{ nullptr };
 
 	QDomDocument xgbnetworks_doc;
+	QStringList xgbnetworks_data;
 };
 
 #endif
