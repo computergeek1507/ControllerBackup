@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QFile>
 #include <QTextStream>
+#include <QDebug>
 
 xLightsRGBEffects::xLightsRGBEffects(QObject* parent) :
 	QObject(parent), m_logger(spdlog::get("ControllerBackup"))
@@ -18,9 +19,13 @@ bool xLightsRGBEffects::LoadXML(QString const& xgbEffects)
         m_logger->warn("Failed to Open xLights XRB Effects File");
         return false;
     }
-    if (!rgbeffects_doc.setContent(&file))
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    if (!rgbeffects_doc.setContent(&file, true, &errorStr, &errorLine, &errorColumn))
     {
         m_logger->warn("Failed to Parse xLights XRB Effects File");
+        m_logger->warn("Line{}:Col{} {}", errorLine, errorColumn, errorStr.toStdString());
         file.close();
         return false;
     }
@@ -92,9 +97,9 @@ bool xLightsRGBEffects::SetModelControllerPort(QString const& model, int port)
             int j = i;
             for (;j < rgbeffects_data.count(); ++j) 
             {
-                if (rgbeffects_data[j].startsWith("    </model>"))
+                if (rgbeffects_data[j].startsWith("      <ControllerConnection"))
                 {
-                    j--;
+                    //j--;
                     break;
                 }
             }
@@ -112,9 +117,13 @@ bool xLightsRGBEffects::SetModelControllerPort(QString const& model, int port)
                 rgbeffects_data[j].replace("Protocol=\"ws2811\"", "Port=\"" + QString::number(port) + "\" Protocol=\"ws2811\"");
                 return true;
             }
+            m_logger->warn("Failed to set controller port: {} \"{}\"", model.toStdString(), rgbeffects_data[j].toStdString());
+            qDebug() << "Failed to set controller port: " << model << " \"" << rgbeffects_data[j] << "\"";
             return false;
         }
     }
+    m_logger->warn("Failed to set controller port: {}", model.toStdString());
+    qDebug() << "Failed to set controller port: " << model;
     return false;
 }
 
@@ -128,10 +137,12 @@ bool xLightsRGBEffects::SetModelControllerChain(QString const& model, QString co
             {
                 return true;
             }
-            rgbeffects_data[i].replace(">", " ModelChain=\">" + chainModel + "\">");
+            rgbeffects_data[i].replace(">", " ModelChain=\"&gt;" + chainModel + "\">");
             return true;
         }
     }
+    m_logger->warn("Failed to set model chain: {}", model.toStdString());
+    qDebug() << "Failed to set model chain: " << model;
     return false;
 }
 
@@ -182,6 +193,8 @@ bool xLightsRGBEffects::SetModelController(QString const& model, QString const& 
             return true;
         }
     }
+    m_logger->warn("Failed to set model Controller: {}", model.toStdString());
+    qDebug() << "Failed to set model Controller: " << model;
     return false;
 }
 

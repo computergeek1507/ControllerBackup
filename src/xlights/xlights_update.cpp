@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFile>
 
 xLightsUpdate::xLightsUpdate(QObject* parent) :
 	QObject(parent), m_logger(spdlog::get("ControllerBackup"))
@@ -107,8 +108,23 @@ bool xLightsUpdate::UpdateXlightsModels(std::vector<ControllerData> controllers,
 		}
 	}
 	QString newEffects = effects_file;
-	newEffects += "2";
-	m_xLightsRGB->SaveXML(newEffects);
+	newEffects += "_old";
+	
+	try
+	{
+		if (QFile::exists(newEffects))
+		{
+			QFile::remove(newEffects);
+		}
+		QFile::rename(effects_file, newEffects);
+	}
+	catch (const std::exception& ex)
+	{
+		qDebug() << "Error: " << ex.what();
+		m_logger->error(ex.what());
+	}
+
+	m_xLightsRGB->SaveXML(effects_file);
 
 	return true;
 }

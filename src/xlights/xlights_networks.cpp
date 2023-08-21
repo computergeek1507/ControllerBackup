@@ -18,9 +18,14 @@ bool xLightsNetworks::LoadXML(QString const& xgbNetworks)
         m_logger->warn("Failed to Open xLights Networks File");
         return false;
     }
-    if (!xgbnetworks_doc.setContent(&file))
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+
+    if (!xgbnetworks_doc.setContent(&file, true, &errorStr, &errorLine, &errorColumn))
     {
         m_logger->warn("Failed to Parse xLights Networks File");
+        m_logger->warn("Line{}:Col{} {}", errorLine, errorColumn, errorStr.toStdString());
         file.close();
         return false;
     }
