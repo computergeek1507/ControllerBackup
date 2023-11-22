@@ -6,7 +6,6 @@
 #include "GeniusController.h"
 #include "WLEDController.h"
 
-
 #include <QFile>
 #include <QDir>
 #include <QElapsedTimer>
@@ -15,6 +14,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDomDocument>
+
+#include <cmath>
 
 void ConfigVisitor::ReadConfig(FalconV3Controller* c)
 {
