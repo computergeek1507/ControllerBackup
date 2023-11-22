@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>718</width>
+    <width>933</width>
     <height>390</height>
    </rect>
   </property>
@@ -19,7 +19,80 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTextEdit" name="textEdit"/>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="handleWidth">
+      <number>10</number>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <widget class="QListWidget" name="lsInfo"/>
+     <widget class="QTableWidget" name="twStrings">
+      <column>
+       <property name="text">
+        <string>Port</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Desp</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Pixels</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Start Channel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>End Channel</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Color Order</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Start Nulls</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>End Nulls</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Brightness</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Gamma</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Group</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Reverse</string>
+       </property>
+      </column>
+     </widget>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

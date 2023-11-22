@@ -110,6 +110,7 @@ QString BackupVisitor::DownloadData(QString const& url, QString const& post) con
 		if (timer.elapsed() >= (5 * 1000))
 		{
 			response->abort();
+			throw std::runtime_error("failed to connect");
 			return QString();
 		}
 		QCoreApplication::processEvents();

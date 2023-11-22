@@ -35,6 +35,8 @@ struct ConfigVisitor
     void ExportData( QString const& fileName) const;
 
     QByteArray ReadFile(QString const& file) const;
+
+    QString ReadIPFromFile (QString const& file) const;
 };
 
 #endif

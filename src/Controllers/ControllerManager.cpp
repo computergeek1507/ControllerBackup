@@ -21,12 +21,21 @@ ControllerManager::ControllerManager():
 bool ControllerManager::BackUpControllerConfigs(QString const& folder)
 {
 	std::unique_ptr<BackupVisitor> visitor = std::make_unique< BackupVisitor>(folder);
+	bool worked{true};
 	for (auto const& c : m_controllers)
 	{
-		c->accept(visitor.get());
-		emit UpdateControllerStatus(c->IP, visitor->BackUpPath);
+		try
+		{
+			c->accept(visitor.get());
+			emit UpdateControllerStatus(c->IP, visitor->BackUpPath, "Saved: ");
+		}
+		catch (const std::exception&)
+		{
+			emit UpdateControllerStatus(c->IP, "", "Failed To Connect!");
+			worked = false;
+		}
 	}
-	return true;
+	return worked;
 }
 
 bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
@@ -34,15 +43,23 @@ bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
 	std::unique_ptr<BackupVisitor> visitor = std::make_unique< BackupVisitor>(folder);	
 	auto c{ GetController(index) };
 
-	c->accept(visitor.get());
-	emit UpdateControllerStatus(c->IP, visitor->BackUpPath);
-	return true;
+	try
+	{
+		c->accept(visitor.get());
+		emit UpdateControllerStatus(c->IP, visitor->BackUpPath, "Saved: ");
+		return true;
+	}
+	catch (const std::exception&)
+	{
+		emit UpdateControllerStatus(c->IP, "", "Failed To Connect!");
+		return false;
+	}
 }
 
 void ControllerManager::UpdateXLightsController(QString const& folder)
 {
 	xLightsUpdate test;
-	std::vector<ControllerData> controllers;
+	//std::vector<ControllerData> controllers;
 	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();
 	for (auto const& c : m_controllers)
 	{
@@ -59,7 +76,7 @@ void ControllerManager::UpdateXLightsController(QString const& folder)
 	test.UpdateXlightsModels(visitor->controllers, m_showdir + QDir::separator() + "xlights_rgbeffects.xml", m_showdir + QDir::separator() + "xlights_networks.xml");
 }
 
-bool ControllerManager::LoadControllers(QString const& outputConfig)
+bool ControllerManager::LoadControllers(QString const& outputConfig, QString const& backupFolder)
 {
 	QDomDocument xmlNetworks;
 	QFile f(outputConfig + QDir::separator() + "xlights_networks.xml");
@@ -110,7 +127,20 @@ bool ControllerManager::LoadControllers(QString const& outputConfig)
 			m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
 		}
 	}
+	LookForBackups(backupFolder);
 	emit ReloadSetFolder(outputConfig);
 	emit ReloadControllers();
 	return true;
+}
+
+
+void ControllerManager::LookForBackups(QString const& folder)
+{
+	for (auto const& c : m_controllers)
+	{
+		if (QFile::exists(folder + QDir::separator() + c->GetFileName()))
+		{
+			c->FilePath = folder + QDir::separator() + c->GetFileName();
+		}
+	}
 }

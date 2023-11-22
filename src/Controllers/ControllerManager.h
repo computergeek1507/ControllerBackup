@@ -18,12 +18,14 @@ class ControllerManager: public QObject
 public:
 
 	ControllerManager();
-	bool LoadControllers(QString const& outputConfig);
+	bool LoadControllers(QString const& outputConfig, QString const& backupFolder);
 
 	bool BackUpControllerConfigs(QString const& folder);
 	bool BackUpControllerConfig(QString const& folder, int index);
 
 	void UpdateXLightsController(QString const& folder);
+
+	void LookForBackups(QString const& folder);
 
 	[[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
 	[[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };
@@ -31,7 +33,7 @@ public:
 Q_SIGNALS:
 	void ReloadControllers();
 	void ReloadSetFolder(QString const& folder);
-	void UpdateControllerStatus(QString const& ip, QString const& status);
+	void UpdateControllerStatus(QString const& ip, QString const& status, QString const& prefix);
 
 private:
 	std::vector<std::unique_ptr<BaseController>> m_controllers;

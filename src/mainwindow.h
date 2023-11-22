@@ -44,7 +44,7 @@ public Q_SLOTS:
 	void customMenuRequested(QPoint pos);
 	void RedrawControllerList();
 	void RedrawFolder(QString const& folder);
-	void UpdateStatus(QString const& ip, QString const& filePath);
+	void UpdateStatus(QString const& ip, QString const& filePath, QString const& prefix);
 	void LogMessage(QString const& message , spdlog::level::level_enum llvl = spdlog::level::level_enum::debug);
 
 private:

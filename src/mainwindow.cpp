@@ -81,14 +81,14 @@ MainWindow::MainWindow(QWidget *parent)
 	auto lastfolder{ m_settings->value("last_folder").toString() };
 	auto backupfolder{ m_settings->value("backup_folder").toString() };
 
-	if (!lastfolder.isEmpty() && QDir(lastfolder).exists())
-	{
-		m_manager->LoadControllers(lastfolder);
-	}
-
 	if (!backupfolder.isEmpty() && QDir(backupfolder).exists())
 	{
 		m_ui->leBackupFolder->setText(backupfolder);
+	}
+
+	if (!lastfolder.isEmpty() && QDir(lastfolder).exists())
+	{
+		m_manager->LoadControllers(lastfolder, backupfolder);
 	}
 }
 
@@ -107,7 +107,7 @@ void MainWindow::on_actionSetShowFolder_triggered()
 	QString const folder = dialog.getExistingDirectory(this, "Select xLight Show Folder", lastfolder, QFileDialog::ShowDirsOnly);
 	if (!folder.isEmpty() && QDir(folder).exists())
 	{
-		m_manager->LoadControllers(folder);
+		m_manager->LoadControllers(folder, m_ui->leBackupFolder->text());
 		m_settings->setValue("last_folder", folder);
 		m_settings->sync();
 	}
@@ -186,6 +186,13 @@ void MainWindow::RedrawControllerList()
 		SetItem(idx, ControllerColumn::IP_Address, c->IP);
 		SetItem(idx, ControllerColumn::Type, c->GetType());
 		SetItem(idx, ControllerColumn::Status, QString());
+
+		if (!c->FilePath.isEmpty())
+		{
+			QFileInfo info(c->FilePath);
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText("Found: " + info.fileName());
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, c->FilePath);
+		}
 	}
 	
 	m_ui->twControllers->resizeColumnsToContents();
@@ -225,7 +232,9 @@ void MainWindow::customMenuRequested(QPoint pos)
 	QModelIndex index = m_ui->twControllers->indexAt(pos);
 	QMenu menu(this);
 
-	QAction* action1 = menu.addAction("Backup Controller");
+	QAction* backup_action = menu.addAction("Backup Controller");
+	QAction* view_action = menu.addAction("View Backup");
+
 
 	QAction* selectedMenuItem = menu.exec(m_ui->twControllers->mapToGlobal(pos));
 	if (selectedMenuItem == nullptr)
@@ -233,7 +242,7 @@ void MainWindow::customMenuRequested(QPoint pos)
 		return;
 	}
 
-	if (selectedMenuItem == action1)
+	if (selectedMenuItem == backup_action)
 	{
 		auto folder = m_ui->leBackupFolder->text();
 		if (!folder.isEmpty() && QDir(folder).exists())
@@ -245,6 +254,11 @@ void MainWindow::customMenuRequested(QPoint pos)
 			QMessageBox::warning(this, "Backup Folder Doesn't Exist", "Backup Folder Doesn't Exist: '" + folder + "'");
 		}
 	}
+	else if (view_action == selectedMenuItem)
+	{
+		BackUpViewer::Load(m_manager->GetController(m_ui->twControllers->currentRow()), this);
+	}
+
 }
 
 void MainWindow::LogMessage(QString const& message, spdlog::level::level_enum llvl)
@@ -257,7 +271,7 @@ void MainWindow::RedrawFolder(QString const& folder)
 	m_ui->lblShowFolder->setText(folder);
 }
 
-void MainWindow::UpdateStatus(QString const& ip, QString const& filePath)
+void MainWindow::UpdateStatus(QString const& ip, QString const& filePath, QString const& prefix)
 {
 	m_ui->twControllers->setRowCount(static_cast<int>(m_manager->GetControllerSize()));
 
@@ -267,7 +281,7 @@ void MainWindow::UpdateStatus(QString const& ip, QString const& filePath)
 		if(cellip == ip)
 		{
 			QFileInfo info(filePath);
-			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText("Saved: " + info.fileName());
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText(prefix + info.fileName());
 			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, filePath);
 			m_ui->twControllers->resizeColumnsToContents();
 			return;

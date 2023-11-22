@@ -18,11 +18,12 @@ struct ControllerPort
 	uint64_t startUniverse{0};
 	QString colorOrder;
 	int startNulls{0};
+	int endNulls{ 0 };
 	int zigZag{0};
 	int group{1};
 	int brightness{100};
 	bool reverse{false};
-	int gamma{1};
+	double gamma{1.0};
 	QString protocol;
 	QString toString() const
 	{
@@ -31,12 +32,28 @@ struct ControllerPort
 	}
 };
 
+struct ControllerInput
+{
+	QString type;
+	uint64_t channels{ 0 };
+	uint64_t startUniverse{ 0 };
+	uint64_t universeCount{ 0 };
+	
+	QString toString() const
+	{
+		return QString("Type:%1,Channel Size:%2,Start Universe:%3,Universe Count:%4")
+			.arg(type).arg(channels).arg(startUniverse).arg(universeCount);
+	}
+};
+
 struct ControllerData
 {
 	QString name;
 	QString mode;
 	QString ip;
+	QString firmware;
 	std::vector<ControllerPort> pixelports;
+	std::vector<ControllerInput> inputs;
 	QString toString() const
 	{
 		return QString("Name:%1,IP Address:%2,Mode:%3")
@@ -46,9 +63,11 @@ struct ControllerData
 	void clear()
 	{
 		pixelports.clear();
+		inputs.clear();
 		ip.clear();
 		name.clear();
 		mode.clear();
+		firmware.clear();
 	}
 };
 

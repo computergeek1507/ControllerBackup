@@ -6,6 +6,7 @@
 #include <ui_backupviewer.h>
 
 struct BaseController;
+struct ControllerData;
 
 class BackUpViewer : public QDialog
 {
@@ -18,6 +19,9 @@ protected:
 public Q_SLOTS:
 
 private:
+
+	void LoadData(ControllerData const& controller);
+
 	Ui::BackUpViewerDialog m_ui;
 };
 
