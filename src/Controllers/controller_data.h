@@ -38,11 +38,12 @@ struct ControllerInput
 	uint64_t channels{ 0 };
 	uint64_t startUniverse{ 0 };
 	uint64_t universeCount{ 0 };
+	uint64_t startChannel{ 1 };
 	
 	QString toString() const
 	{
-		return QString("Type:%1,Channel Size:%2,Start Universe:%3,Universe Count:%4")
-			.arg(type).arg(channels).arg(startUniverse).arg(universeCount);
+		return QString("Type:%1, Channel Size:%2, Start Universe:%3, Universe Count:%4, Start Channel:%5")
+			.arg(type).arg(channels).arg(startUniverse).arg(universeCount).arg(startChannel);
 	}
 };
 

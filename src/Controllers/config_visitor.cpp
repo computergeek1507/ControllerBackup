@@ -21,25 +21,71 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
     ControllerData configData;
     auto data = ReadFile(c->FilePath);
 
-    QDomDocument document;
     //load the file
-    QFile xmlFile(data);
-    if (!xmlFile.exists() || !xmlFile.open(QFile::ReadOnly | QFile::Text)) {
-        qDebug() << "Check your file";
-        return;
-    }
     QDomDocument doc;
-    doc.setContent(&xmlFile);
+    doc.setContent(data);
     QDomElement docElem = doc.documentElement();
 
-    QDomElement headerElement = docElem.firstChildElement("universes");
-    if (headerElement.isNull() == true) {
-        return;
+    QDomElement universeElement = docElem.firstChildElement("universes");
+    if (!universeElement.isNull()) {
+        QDomNode node = universeElement.firstChild();
+        while (!node.isNull()) {
+            QDomElement element = node.toElement();
+            if (!element.isNull()) {
+                //const QString tagName(element.tagName());
+                QString universe = element.attribute("u");
+                QString lenth = element.attribute("l");
+                QString sc = element.attribute("s");
+                ControllerInput input;
+                input.channels = lenth.toInt();
+                input.startUniverse = universe.toInt();
+                input.universeCount = 1;
+                input.startChannel = sc.toInt();
+                //input.type = stringsObj.value("p").toString();
+                configData.inputs.push_back(input);
+            }
+            node = node.nextSibling();
+        }
     }
-    QDomElement nameElement = headerElement.firstChildElement("un");
-    
-    QString universe = nameElement.attribute("u");
 
+    QDomElement stringsElement = docElem.firstChildElement("strings");
+    if (!stringsElement.isNull()) {
+        QDomNode node = stringsElement.firstChild();
+        while (!node.isNull()) {
+            QDomElement element = node.toElement();
+            if (!element.isNull()) {
+                //const QString tagName(element.tagName());
+                QString name = element.attribute("y");
+                QString port = element.attribute("p");
+                QString uni = element.attribute("u");
+                QString pixels = element.attribute("c");
+                QString us = element.attribute("us");
+                QString start = element.attribute("s");
+                 ControllerPort pixelport;
+                pixelport.port = port.toInt() + 1;
+                pixelport.pixels = pixels.toInt();
+                pixelport.name = name;
+                pixelport.startNulls = element.attribute("n").toInt();
+                //pixelport.universeCount = 1;
+                if (us == "0") {
+                    pixelport.startChannel = start.toInt();
+                } else {
+                    pixelport.startUniverse = uni.toInt();
+                    pixelport.startChannel = us.toInt();
+                }
+                //input.type = stringsObj.value("p").toString();
+                configData.pixelports.push_back(pixelport);
+            }
+            node = node.nextSibling();
+        }
+    }
+    
+    //QDomElement nameElement = headerElement.firstChildElement("un");
+    
+    //QString universe = nameElement.attribute("u");
+    configData.ip = c->IP;
+    //ReadIPFromFile(c->FilePath);
+    controllers.push_back(configData);
 }
 
 void ConfigVisitor::ReadConfig(FalconV4Controller* c)
