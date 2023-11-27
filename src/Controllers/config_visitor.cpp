@@ -214,16 +214,7 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
                 ControllerPort port;
                 port.port = i + 1;
                 port.brightness = 30;
-                //port.startUniverse = stringsObj.value("u").toInt();
-                //port.startChannel = stringsObj.value("sc").toInt() + 1;
-                //port.pixels = stringsObj.value("n").toInt();
-                //port.startNulls = stringsObj.value("ns").toInt();
-                //port.endNulls = stringsObj.value("ne").toInt();
-                //port.group = stringsObj.value("gp").toInt();
-                //port.zigZag = stringsObj.value("z").toInt();
-                //port.reverse = stringsObj.value("v").toInt();
-                //port.name = stringsObj.value("nm").toString();
-                //port.gamma = stringsObj.value("g").toInt() / 10.0;
+                port.protocol = "ws2811";
                 QJsonValue vitualString = stringsObj.value("virtual_strings");
                 if (vitualString.type() == QJsonValue::Array)
                 {
@@ -279,7 +270,6 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
             }
         }
     }
-
 
     QJsonValue inputs = rootObj.value("inputs");
     if (inputs.type() == QJsonValue::Array)
