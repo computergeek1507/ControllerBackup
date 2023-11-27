@@ -18,6 +18,13 @@ struct FalconV3Controller : BaseController
 	void accept(BackupVisitor * v) override;
 	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
+
+	QString DecodeMode(int mode) const;
+	QString DecodePixelProtocol(int protocol) const;
+	QString DecodeSerialProtocol(int protocol) const;
+	QString DecodeColorOrder(int color) const;
+	int DecodeBrightness(int brightnessCode) const;
+	float DecodeGamma(int gammaCode) const;
 };
 
 #endif

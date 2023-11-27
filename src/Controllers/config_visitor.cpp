@@ -67,6 +67,11 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
                 pixelport.pixels = pixels.toInt();
                 pixelport.name = name;
                 pixelport.startNulls = element.attribute("n").toInt();
+                pixelport.reverse = (element.attribute("d").toInt());
+                pixelport.gamma = c->DecodeGamma(element.attribute("ga").toInt());
+                pixelport.brightness = c->DecodeBrightness(element.attribute("b").toInt());
+                pixelport.colorOrder = c->DecodeColorOrder(element.attribute("o").toInt());
+                pixelport.protocol = c->DecodePixelProtocol(element.attribute("t").toInt());
                 //pixelport.universeCount = 1;
                 if (us == "0") {
                     pixelport.startChannel = start.toInt();
@@ -100,14 +105,8 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
     QJsonValue controller = rootObj.value("C");
     QJsonValue mode = controller.toObject().value("O");
     int iMode = mode.toInt();
-    switch (iMode)
-    {
-        case 0:
-            configData.mode = "Bridge";
-            break;
-        default:
-            break;
-    }
+
+    configData.mode = c->DecodeMode(iMode);
 
     QJsonValue name = controller.toObject().value("N");
     configData.name = name.toString();
@@ -141,6 +140,8 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
                 port.reverse = stringsObj.value("v").toInt();
                 port.name = stringsObj.value("nm").toString();
                 port.gamma = stringsObj.value("g").toInt()/10.0;
+                port.colorOrder = c->DecodeColorOrder(stringsObj.value("o").toInt());
+                port.protocol = c->DecodePixelProtocol(stringsObj.value("l").toInt());
                 configData.pixelports.push_back(port);
             }
         }
@@ -265,6 +266,10 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
                             {
                                 port.gamma = vsObj.value("g").toDouble();
                             }
+                            if (vsObj.contains("st"))
+                            {
+                                port.colorOrder = vsObj.value("st").toString();
+                            }
                         }
 
                         port.pixels += vsObj.value("ec").toInt();
@@ -344,30 +349,9 @@ void ConfigVisitor::ReadConfig(WLEDController* c)
                 //port.name = stringsObj.value("nm").toString();
                 //port.gamma = stringsObj.value("g").toInt() / 10.0;
                 int order = stringsObj.value("order").toInt();
-                switch (order)
-                {
-                case 0:
-                    port.colorOrder = "grb";
-                    break;
-                case 1:
-                    port.colorOrder = "rgb";
-                    break;
-                case 2:
-                    port.colorOrder = "brg";
-                    break;
-                case 3:
-                    port.colorOrder = "rbg";
-                    break;
-                case 4:
-                    port.colorOrder = "bgr";
-                    break;
-                case 5:
-                    port.colorOrder = "gbr";
-                    break;
-                default:
-                    break;
-                }
-                
+                port.colorOrder = c->DecodeColorOrder(order);
+                int pixeltype = stringsObj.value("type").toInt();
+                port.protocol = c->DecodePixelProtocol(pixeltype);
                 configData.pixelports.push_back(port);
             }
         }

@@ -21,6 +21,11 @@ struct FalconV4Controller : BaseController
 	void accept(BackupVisitor * v) override;
 	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
+
+
+	QString DecodeMode(int mode) const;
+	QString DecodePixelProtocol(int protocol) const;
+	QString DecodeColorOrder(int color) const;
 };
 
 #endif

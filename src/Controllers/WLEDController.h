@@ -18,6 +18,9 @@ struct WLEDController : BaseController
 	void accept(BackupVisitor * v) override;
 	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
+
+	QString DecodePixelProtocol(int protocol) const;
+	QString DecodeColorOrder(int color) const;
 };
 
 #endif
