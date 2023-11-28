@@ -1,7 +1,7 @@
 #ifndef BACKUPVISITOR_H
 #define BACKUPVISITOR_H
 
-
+#include "backup_file.h"
 
 #include <QString>
 #include <QObject>
@@ -21,7 +21,7 @@ struct BackupVisitor
 {
     QString Folder;
     //QString File;
-    QString BackUpPath;
+    std::vector<BackupFile> BackUpPaths;
 
     BackupVisitor(QString folder) : Folder(folder)
     {}
@@ -38,7 +38,7 @@ struct BackupVisitor
 
     [[nodiscard]] QString DownloadData(QString const& url) const;
 	[[nodiscard]] QString DownloadData(QString const& url, QString const& post) const;
-	void SaveData(QByteArray const& json, QString const& backupfolder, QString const& fileName);
+	void SaveData(QByteArray const& json, QString const& backupfolder, QString const& fileName, BackupType type = BackupType::All);
 };
 
 #endif

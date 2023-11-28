@@ -12,6 +12,7 @@
 
 #include <QtXml>
 #include <QFile>
+#include "backup_file.h"
 
 ControllerManager::ControllerManager():
 		m_logger(spdlog::get("ControllerBackup"))
@@ -27,11 +28,11 @@ bool ControllerManager::BackUpControllerConfigs(QString const& folder)
 		try
 		{
 			c->accept(visitor.get());
-			emit UpdateControllerStatus(c->IP, visitor->BackUpPath, "Saved: ");
+			emit UpdateControllerStatus(c->IP, c->GetBackupFilePaths(), "Saved: ");
 		}
 		catch (const std::exception&)
 		{
-			emit UpdateControllerStatus(c->IP, "", "Failed To Connect!");
+			emit UpdateControllerStatus(c->IP, { "" }, "Failed To Connect!");
 			worked = false;
 		}
 	}
@@ -46,12 +47,12 @@ bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
 	try
 	{
 		c->accept(visitor.get());
-		emit UpdateControllerStatus(c->IP, visitor->BackUpPath, "Saved: ");
+		emit UpdateControllerStatus(c->IP, c->GetBackupFilePaths(), "Saved: ");
 		return true;
 	}
 	catch (const std::exception&)
 	{
-		emit UpdateControllerStatus(c->IP, "", "Failed To Connect!");
+		emit UpdateControllerStatus(c->IP, { "" }, "Failed To Connect!");
 		return false;
 	}
 }
@@ -59,15 +60,10 @@ bool ControllerManager::BackUpControllerConfig(QString const& folder, int index)
 void ControllerManager::UpdateXLightsController(QString const& folder)
 {
 	xLightsUpdate test;
-	//std::vector<ControllerData> controllers;
 	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();
 	for (auto const& c : m_controllers)
 	{
-		if (QFile::exists(folder + QDir::separator() + c->GetFileName()))
-		{
-			c->FilePath = folder + QDir::separator() + c->GetFileName();
-		}
-		else
+		if (!LookForBackup(folder, c.get()))
 		{
 			continue;
 		}
@@ -100,7 +96,8 @@ bool ControllerManager::LoadControllers(QString const& outputConfig, QString con
 		QString const vendor = controllerXML.attribute("Vendor", "");
 		QString const model = controllerXML.attribute("Model", "");
 		QString const ipAddress = controllerXML.attribute("IP", "");
-		if ("Falcon" == vendor && (model == "F16V4" || model == "F48V4"))
+		if ("Falcon" == vendor && (model == "F16V4" || model == "F48V4" 
+			|| model == "F16V5" || model == "F48V5"))
 		{
 			m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
 		}
@@ -108,11 +105,12 @@ bool ControllerManager::LoadControllers(QString const& outputConfig, QString con
 		{
 			m_controllers.emplace_back(std::make_unique<FalconV3Controller>(name, ipAddress));
 		}
-		else if ("FPP" == vendor || "ScottNation" == vendor || "KulpLights" == vendor)
+		else if ("FPP" == vendor || "ScottNation" == vendor || "KulpLights" == vendor 
+			|| "Wallys Lights" == vendor || "Hanson Electronics" == vendor || "MICROCYB" == vendor)
 		{
 			m_controllers.emplace_back(std::make_unique<FPPController>(name, ipAddress, vendor, model));
 		}
-		else if ("Experience Lights" == vendor)
+		else if ("Experience Lights" == vendor || "Mattos Designs" == vendor)
 		{
 			m_controllers.emplace_back(std::make_unique<GeniusController>(name, ipAddress));
 		}
@@ -138,9 +136,19 @@ void ControllerManager::LookForBackups(QString const& folder)
 {
 	for (auto const& c : m_controllers)
 	{
-		if (QFile::exists(folder + QDir::separator() + c->GetFileName()))
+		LookForBackup(folder, c.get());
+	}
+}
+
+bool ControllerManager::LookForBackup(QString const& folder, BaseController* c)
+{
+	bool found{false};
+	for (BackupType t : BACKUP_TYPES) {
+		if (QFile::exists(folder + QDir::separator() + c->GetFileName(t)))
 		{
-			c->FilePath = folder + QDir::separator() + c->GetFileName();
+			c->FilePaths.emplace_back(t, folder + QDir::separator() + c->GetFileName(t));
+			found = true;
 		}
 	}
+	return found;
 }

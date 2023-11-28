@@ -18,7 +18,7 @@ struct WLEDController;
 
 struct ConfigVisitor
 {
-    QString Folder;
+    //QString Folder;
     //QString File;
     std::vector<ControllerData> controllers;
 
@@ -32,11 +32,7 @@ struct ConfigVisitor
 
     void ReadConfig(WLEDController* c);
 
-    void ExportData( QString const& fileName) const;
-
     QByteArray ReadFile(QString const& file) const;
-
-    QString ReadIPFromFile (QString const& file) const;
 };
 
 #endif

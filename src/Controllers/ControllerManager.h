@@ -26,6 +26,7 @@ public:
 	void UpdateXLightsController(QString const& folder);
 
 	void LookForBackups(QString const& folder);
+	bool LookForBackup(QString const& folder, BaseController* c);
 
 	[[nodiscard]] BaseController* GetController(int index) const { return m_controllers[index].get(); };
 	[[nodiscard]] size_t GetControllerSize() const { return m_controllers.size(); };
@@ -33,7 +34,7 @@ public:
 Q_SIGNALS:
 	void ReloadControllers();
 	void ReloadSetFolder(QString const& folder);
-	void UpdateControllerStatus(QString const& ip, QString const& status, QString const& prefix);
+	void UpdateControllerStatus(QString const& ip, QStringList const& status, QString const& prefix);
 
 private:
 	std::vector<std::unique_ptr<BaseController>> m_controllers;

@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
+#include <QProcess>
 
 #include "backup_viewer/backup_viewer.h"
 
@@ -158,10 +159,13 @@ void MainWindow::on_twControllers_cellDoubleClicked(int row, int column)
 	}
 	else if (column == std::to_underlying(ControllerColumn::Status))
 	{
-		auto file = m_ui->twControllers->item(row, std::to_underlying(ControllerColumn::Status))->data(Qt::UserRole).toString();
-		if (QFile::exists(file)) 
+		auto files = m_ui->twControllers->item(row, std::to_underlying(ControllerColumn::Status))->data(Qt::UserRole).toStringList();
+		for (auto const& file: files) 
 		{
-			QDesktopServices::openUrl(QUrl::fromLocalFile(file));
+			if (QFile::exists(file))
+			{
+				OpenFile(file);
+			}
 		}
 	}
 }
@@ -187,11 +191,10 @@ void MainWindow::RedrawControllerList()
 		SetItem(idx, ControllerColumn::Type, c->GetType());
 		SetItem(idx, ControllerColumn::Status, QString());
 
-		if (!c->FilePath.isEmpty())
+		if (!c->FilePaths.empty())
 		{
-			QFileInfo info(c->FilePath);
-			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText("Found: " + info.fileName());
-			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, c->FilePath);
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText("Found: " + c->GetBackupFileNames().join(","));
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, c->GetBackupFilePaths());
 		}
 	}
 	
@@ -234,7 +237,7 @@ void MainWindow::customMenuRequested(QPoint pos)
 
 	QAction* backup_action = menu.addAction("Backup Controller");
 	QAction* view_action = menu.addAction("View Backup");
-
+	QAction* view_file_action = menu.addAction("View Backup File");
 
 	QAction* selectedMenuItem = menu.exec(m_ui->twControllers->mapToGlobal(pos));
 	if (selectedMenuItem == nullptr)
@@ -258,7 +261,17 @@ void MainWindow::customMenuRequested(QPoint pos)
 	{
 		BackUpViewer::Load(m_manager->GetController(m_ui->twControllers->currentRow()), this);
 	}
-
+	else if (view_file_action == selectedMenuItem)
+	{
+		auto files = m_ui->twControllers->item(m_ui->twControllers->currentRow(), std::to_underlying(ControllerColumn::Status))->data(Qt::UserRole).toStringList();
+		for (auto const& file : files)
+		{
+			if (QFile::exists(file))
+			{
+				OpenFile(file);
+			}
+		}
+	}
 }
 
 void MainWindow::LogMessage(QString const& message, spdlog::level::level_enum llvl)
@@ -271,7 +284,7 @@ void MainWindow::RedrawFolder(QString const& folder)
 	m_ui->lblShowFolder->setText(folder);
 }
 
-void MainWindow::UpdateStatus(QString const& ip, QString const& filePath, QString const& prefix)
+void MainWindow::UpdateStatus(QString const& ip, QStringList const& filePaths, QString const& prefix)
 {
 	m_ui->twControllers->setRowCount(static_cast<int>(m_manager->GetControllerSize()));
 
@@ -280,11 +293,39 @@ void MainWindow::UpdateStatus(QString const& ip, QString const& filePath, QStrin
 		auto cellip = m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::IP_Address))->text();
 		if(cellip == ip)
 		{
-			QFileInfo info(filePath);
-			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText(prefix + info.fileName());
-			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, filePath);
+			QStringList Names;
+			for (auto const& f : filePaths)
+			{
+				QFileInfo info(f);
+				Names.append(info.fileName());
+			}
+			
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setText(prefix + Names.join(","));
+			m_ui->twControllers->item(idx, std::to_underlying(ControllerColumn::Status))->setData(Qt::UserRole, filePaths);
 			m_ui->twControllers->resizeColumnsToContents();
 			return;
 		}
+	}
+}
+
+void MainWindow::OpenFile(QString const& path)
+{
+#if defined( Q_OS_WIN )
+	static const QString notepadpp_x64Path = R"(C:\Program Files\Notepad++\notepad++.exe)";
+	static const QString notepadpp_x32Path = R"(C:\Program Files (x86)\Notepad++\notepad++.exe)";
+	if (QFile::exists(notepadpp_x64Path))
+	{
+		QProcess::startDetached(notepadpp_x64Path, QStringList() << path);
+		return;
+	}
+	else if (QFile::exists(notepadpp_x32Path))
+	{
+		QProcess::startDetached(notepadpp_x32Path, QStringList() << path);
+		return;
+	}
+	else
+#endif
+	{
+		QDesktopServices::openUrl(QUrl("File:///" + path, QUrl::TolerantMode));
 	}
 }

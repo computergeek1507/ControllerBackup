@@ -26,6 +26,8 @@ BackUpViewer::BackUpViewer(BaseController * controller, QWidget* parent ) :
 
 	m_ui.splitter->setStretchFactor(0, 1);
 	m_ui.splitter->setStretchFactor(1, 3);
+	m_ui.twStrings->hideColumn(std::to_underlying(StringPortColumn::EndChan));
+
 	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();
 
 	if (!controller->GetFileName().isEmpty())

@@ -6,6 +6,7 @@
 #include "GeniusController.h"
 #include "WLEDController.h"
 
+
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QFile>
@@ -17,7 +18,7 @@ void BackupVisitor::BackUp(FalconV3Controller* c)
 {
     auto json = DownloadData("http://" + c->IP + "/settings.xml");
 	SaveData(json.toLatin1(), Folder, c->GetFileName());
-	c->FilePath = BackUpPath;
+	c->FilePaths = BackUpPaths;
 }
 
 void BackupVisitor::BackUp(FalconV4Controller* c)
@@ -38,7 +39,7 @@ void BackupVisitor::BackUp(FalconV4Controller* c)
     QJsonDocument doc(controllerObject);
     //qDebug() << doc.toJson();
     SaveData(doc.toJson(), Folder, c->GetFileName());
-	c->FilePath = BackUpPath;
+	c->FilePaths = BackUpPaths;
 }
 
 void BackupVisitor::BackUp(FPPController* c)
@@ -48,24 +49,30 @@ void BackupVisitor::BackUp(FPPController* c)
 	{
 		stringurl = c->GetPIStringsURL();
 	}
-	///fppjson.php?command=getChannelOutputs&file=co-bbbStrings
+	// /api/channel/output/co-bbbStrings
 	auto json = DownloadData("http://" + c->IP + stringurl);
-	SaveData(json.toLatin1(), Folder, c->GetFileName());
-	c->FilePath = BackUpPath;
+	SaveData(json.toLatin1(), Folder, c->GetFileName(BackupType::OuputPixels), BackupType::OuputPixels);
+
+	json = DownloadData("http://" + c->IP + c->GetInputsURL());
+	SaveData(json.toLatin1(), Folder, c->GetFileName(BackupType::Input), BackupType::Input);
+
+	json = DownloadData("http://" + c->IP + c->GetOtherOutputURL());
+	SaveData(json.toLatin1(), Folder, c->GetFileName(BackupType::OuputSerials), BackupType::OuputSerials);
+	c->FilePaths = BackUpPaths;
 }
 
 void BackupVisitor::BackUp(GeniusController* c)
 {
     auto json = DownloadData("http://" + c->IP + c->GetConfigURL());
 	SaveData(json.toLatin1(), Folder, c->GetFileName());
-	c->FilePath = BackUpPath;
+	c->FilePaths = BackUpPaths;
 }
 
 void BackupVisitor::BackUp(WLEDController* c)
 {
     auto json = DownloadData("http://" + c->IP + c->GetCfgURL());
 	SaveData(json.toLatin1(), Folder, c->GetFileName());
-	c->FilePath = BackUpPath;
+	c->FilePaths = BackUpPaths;
 }
 
 QString BackupVisitor::DownloadData(QString const& url) const
@@ -121,7 +128,7 @@ QString BackupVisitor::DownloadData(QString const& url, QString const& post) con
 	return content;
 }
 
-void BackupVisitor::SaveData(QByteArray const& fileData, QString const& backupfolder, QString const& fileName)
+void BackupVisitor::SaveData(QByteArray const& fileData, QString const& backupfolder, QString const& fileName, BackupType type)
 {
 	if (fileData.isEmpty()) 
 	{
@@ -137,5 +144,5 @@ void BackupVisitor::SaveData(QByteArray const& fileData, QString const& backupfo
 		return;
 	}
 	saveFile.write(fileData);
-	BackUpPath = filePath;
+	BackUpPaths.emplace_back(type, filePath);
 }

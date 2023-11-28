@@ -53,22 +53,26 @@ struct ControllerData
 	QString mode;
 	QString ip;
 	QString firmware;
+	bool absoluteStartAddress{false};
 	std::vector<ControllerPort> pixelports;
+	std::vector<ControllerPort> serialports;
 	std::vector<ControllerInput> inputs;
 	QString toString() const
 	{
-		return QString("Name:%1,IP Address:%2,Mode:%3")
-			.arg(name).arg(ip).arg(mode);
+		return QString("Name:%1,IP Address:%2,Mode:%3,Firmware:%4")
+			.arg(name).arg(ip).arg(mode).arg(firmware);
 	}
 
 	void clear()
 	{
 		pixelports.clear();
+		serialports.clear();
 		inputs.clear();
 		ip.clear();
 		name.clear();
 		mode.clear();
 		firmware.clear();
+		absoluteStartAddress = false;
 	}
 };
 

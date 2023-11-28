@@ -44,7 +44,7 @@ public Q_SLOTS:
 	void customMenuRequested(QPoint pos);
 	void RedrawControllerList();
 	void RedrawFolder(QString const& folder);
-	void UpdateStatus(QString const& ip, QString const& filePath, QString const& prefix);
+	void UpdateStatus(QString const& ip, QStringList const& filePaths, QString const& prefix);
 	void LogMessage(QString const& message , spdlog::level::level_enum llvl = spdlog::level::level_enum::debug);
 
 private:
@@ -54,6 +54,8 @@ private:
 	QString m_appdir;
 
 	std::unique_ptr<ControllerManager> m_manager{ nullptr };
+
+	void OpenFile(QString const& path);
 
 };
 #endif // MAINWINDOW_H

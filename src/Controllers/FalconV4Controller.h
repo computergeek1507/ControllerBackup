@@ -3,7 +3,6 @@
 
 #include "BaseController.h"
 #include "BackupVisitor.h"
-#include "../backup_viewer/viewer_visitor.h"
 #include "config_visitor.h"
 
 #include <QString>
@@ -12,20 +11,18 @@
 struct FalconV4Controller : BaseController
 {
 	FalconV4Controller(QString name, QString  ip): BaseController(std::move(name), std::move(ip)) {}
-	QString GetType() const override{ return "FalconV4"; };
-	QString BuildParm(QString const& type, QString const& method) const;
-	QJsonObject GetReturnParm(QString const& json) const;
+	[[nodiscard]] QString GetType() const override{ return "FalconV4"; };
+	[[nodiscard]] QString BuildParm(QString const& type, QString const& method) const;
+	[[nodiscard]] QJsonObject GetReturnParm(QString const& json) const;
 
 	static const QString GetAPI() { return "/api"; };
 
 	void accept(BackupVisitor * v) override;
-	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
 
-
-	QString DecodeMode(int mode) const;
-	QString DecodePixelProtocol(int protocol) const;
-	QString DecodeColorOrder(int color) const;
+	[[nodiscard]] QString DecodeMode(int mode) const;
+	[[nodiscard]] QString DecodePixelProtocol(int protocol) const;
+	[[nodiscard]] QString DecodeColorOrder(int color) const;
 };
 
 #endif

@@ -3,12 +3,8 @@
 
 #include "BaseController.h"
 
-
 #include <QString>
 #include <memory>
-
-struct BackupVisitor;
-struct ViewerVisitor;
 
 struct GeniusController : BaseController
 {
@@ -18,7 +14,6 @@ struct GeniusController : BaseController
 	static const QString GetConfigURL() { return "/api/config"; };
 	
 	void accept(BackupVisitor * v) override;
-	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
 };
 

@@ -3,7 +3,6 @@
 
 #include "BaseController.h"
 
-
 #include <QString>
 #include <memory>
 
@@ -16,7 +15,6 @@ struct WLEDController : BaseController
     static const QString GetCfgURL() { return"/json/cfg"; };
 
 	void accept(BackupVisitor * v) override;
-	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
 
 	QString DecodePixelProtocol(int protocol) const;

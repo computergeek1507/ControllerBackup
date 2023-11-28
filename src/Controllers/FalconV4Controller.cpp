@@ -8,10 +8,6 @@ void FalconV4Controller::accept(BackupVisitor * v)
 {
 	v->BackUp(this);
 }
-void FalconV4Controller::accept(ViewerVisitor * v)
-{
-	v->DisplayOuputs(this);
-}
 
 void FalconV4Controller::accept(ConfigVisitor * v)
 {

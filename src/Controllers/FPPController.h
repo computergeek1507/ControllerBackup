@@ -3,7 +3,6 @@
 
 #include "BaseController.h"
 #include "BackupVisitor.h"
-#include "../backup_viewer/viewer_visitor.h"
 
 #include <QString>
 #include <memory>
@@ -18,12 +17,15 @@ struct FPPController : BaseController
 	QString Vender;
 	QString Model;
 
-	static const QString GetBBBStringsURL() { return "/fppjson.php?command=getChannelOutputs&file=co-bbbStrings"; };
-	static const QString GetPIStringsURL() { return "/fppjson.php?command=getChannelOutputs&file=co-pixelStrings"; };
+	static const QString GetInputsURL() { return "/api/configfile/ci-universes.json"; };
+	static const QString GetBBBStringsURL() { return "/api/channel/output/co-bbbStrings"; };
+	static const QString GetPIStringsURL() { return "/api/channel/output/co-pixelStrings"; };
+	static const QString GetOtherOutputURL() { return "/api/channel/output/co-other"; };
 
 	void accept(BackupVisitor * v) override;
-	void accept(ViewerVisitor * v) override;
 	void accept(ConfigVisitor * v) override;
+
+	QString DecodeInputType(int type) const;
 };
 
 #endif

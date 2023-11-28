@@ -20,7 +20,7 @@
 void ConfigVisitor::ReadConfig(FalconV3Controller* c)
 {
     ControllerData configData;
-    auto data = ReadFile(c->FilePath);
+    auto data = ReadFile(c->GetBackupFile());
 
     //load the file
     QDomDocument doc;
@@ -29,6 +29,8 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
 
     QDomElement universeElement = docElem.firstChildElement("universes");
     if (!universeElement.isNull()) {
+        QString absolute = universeElement.attribute("a");
+        configData.absoluteStartAddress = absolute.toInt();
         QDomNode node = universeElement.firstChild();
         while (!node.isNull()) {
             QDomElement element = node.toElement();
@@ -72,6 +74,7 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
                 pixelport.brightness = c->DecodeBrightness(element.attribute("b").toInt());
                 pixelport.colorOrder = c->DecodeColorOrder(element.attribute("o").toInt());
                 pixelport.protocol = c->DecodePixelProtocol(element.attribute("t").toInt());
+                pixelport.group = element.attribute("g").toInt();
                 //pixelport.universeCount = 1;
                 if (us == "0") {
                     pixelport.startChannel = start.toInt();
@@ -97,7 +100,7 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
 void ConfigVisitor::ReadConfig(FalconV4Controller* c)
 {
     ControllerData configData;
-    auto data = ReadFile(c->FilePath);
+    auto data = ReadFile(c->GetBackupFile());
 	QJsonDocument configJson = QJsonDocument::fromJson(data);
 
 	QJsonObject rootObj = configJson.object();
@@ -105,7 +108,6 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
     QJsonValue controller = rootObj.value("C");
     QJsonValue mode = controller.toObject().value("O");
     int iMode = mode.toInt();
-
     configData.mode = c->DecodeMode(iMode);
 
     QJsonValue name = controller.toObject().value("N");
@@ -116,6 +118,9 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
 
     QJsonValue version = controller.toObject().value("V");
     configData.firmware = version.toString();
+
+    QJsonValue absolute = controller.toObject().value("A");
+    configData.absoluteStartAddress = absolute.toInt();
 
     QJsonValue topString = rootObj.value("S");
     QJsonValue strings = topString.toObject().value("A");
@@ -173,23 +178,105 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
     }
     else 
     {
-        qDebug() << c->FilePath << "was invalid";
+        qDebug() << c->GetBackupFile() << "was invalid";
     }
 }
 
 void ConfigVisitor::ReadConfig(FPPController* c)
 {
     ControllerData configData;
-    auto data = ReadFile(c->FilePath);
-    QJsonDocument configJson = QJsonDocument::fromJson(data);
+    auto data = ReadFile(c->GetBackupFile(BackupType::Input));
+    QJsonDocument input_Json = QJsonDocument::fromJson(data);
 
-    QJsonObject rootObj = configJson.object();
+    QJsonObject root_in_Obj = input_Json.object();
+    QJsonValue channelInputs = root_in_Obj.value("channelInputs");
+    if (channelInputs.type() == QJsonValue::Array)
+    {
+        QJsonArray inputArray = channelInputs.toArray();
+        for (int j = 0; j < inputArray.count(); j++)
+        {
+            QJsonValue inputChild = inputArray.at(j);
+            if (inputChild.type() == QJsonValue::Object)
+            {
+                QJsonObject inputObj = inputChild.toObject();
+                QString in_type = inputObj.value("type").toString();
+                if (in_type.compare("universes") == 0)
+                {
+                    auto uni = inputObj.value("universes");
+                    if (uni.type() == QJsonValue::Array)
+                    {
+                        QJsonArray uniArray = uni.toArray();
+                        for (int i = 0; i < uniArray.count(); i++)
+                        {
+                            QJsonValue uniChild = uniArray.at(i);
+                            QJsonObject uniObj = uniChild.toObject();
+                            ControllerInput input;
+                            input.channels = uniObj.value("channelCount").toInt();
+                            input.startUniverse = uniObj.value("id").toInt();
+                            input.universeCount = uniObj.value("universeCount").toInt();
+                            input.type = c->DecodeInputType(uniObj.value("type").toInt());
+                            configData.inputs.push_back(input);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    data = ReadFile(c->GetBackupFile(BackupType::OuputPixels));
+    QJsonDocument strings_Json = QJsonDocument::fromJson(data);
+
+    QJsonObject root_co_Obj = strings_Json.object();
+    QJsonValue channelOuputs = root_co_Obj.value("channelOutputs");
+    if (channelOuputs.type() == QJsonValue::Array)
+    {
+        QJsonArray outputArray = channelOuputs.toArray();
+        for (int j = 0; j < outputArray.count(); j++)
+        {
+            QJsonValue stringsChild = outputArray.at(j);
+            if (stringsChild.type() == QJsonValue::Object)
+            {
+                QJsonObject stringsObj = stringsChild.toObject();
+                ControllerPort port;
+                port.port = stringsObj.value("startChannel").toInt(); + 1;
+                port.brightness = 30;
+                port.protocol = "ws2811";
+                QJsonValue vitualString = stringsObj.value("virtualStrings");
+                if (vitualString.type() == QJsonValue::Array)
+                {
+                    QJsonArray vsArray = vitualString.toArray();
+                    for (int i = 0; i < vsArray.count(); i++)
+                    {
+                        QJsonValue vsChild = vsArray.at(i);
+                        QJsonObject vsObj = vsChild.toObject();
+                        if (i == 0)
+                        {
+                            port.startChannel = vsObj.value("startChannel").toInt();
+                            port.name = vsObj.value("description").toString();
+                            //port.startUniverse = vsObj.value("su").toInt();
+                            port.startNulls = vsObj.value("nullNodes").toInt();
+                            port.endNulls = vsObj.value("endNulls").toInt();
+                            port.reverse = vsObj.value("reverse").toBool();
+                            port.brightness = vsObj.value("brightness").toInt();
+                            port.gamma = vsObj.value("gamma").toDouble();
+                            port.colorOrder = vsObj.value("colorOrder").toString();
+                            port.group = vsObj.value("groupCount").toInt();
+                        }
+
+                        port.pixels += vsObj.value("pixelCount").toInt();
+                    }
+                }
+                configData.pixelports.push_back(port);
+            }
+        }
+    }
 }
 
 void ConfigVisitor::ReadConfig(GeniusController* c)
 {
     ControllerData configData;
-    auto data = ReadFile(c->FilePath);
+    auto data = ReadFile(c->GetBackupFile());
     QJsonDocument configJson = QJsonDocument::fromJson(data);
 
     QJsonObject rootObj = configJson.object();
@@ -200,6 +287,10 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
     QJsonValue mode = system.toObject().value("operating_mode");
     configData.mode = mode.toString();
 
+    if (system.toObject().contains("firmware_version"))
+    {
+        configData.firmware = system.toObject().value("firmware_version").toString();
+    }
 
     QJsonValue strings = rootObj.value("outputs");
     if (strings.type() == QJsonValue::Array)
@@ -298,14 +389,14 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
     }
     else
     {
-        qDebug() << c->FilePath << "was invalid";
+        qDebug() << c->GetBackupFile() << "was invalid";
     }
 }
 
 void ConfigVisitor::ReadConfig(WLEDController* c)
 {
     ControllerData configData;
-    auto data = ReadFile(c->FilePath);
+    auto data = ReadFile(c->GetBackupFile());
     QJsonDocument configJson = QJsonDocument::fromJson(data);
 
     QJsonObject rootObj = configJson.object();
@@ -382,14 +473,4 @@ QByteArray ConfigVisitor::ReadFile(QString const& file) const
 	}
 
 	return f.readAll();
-}
-
-void ConfigVisitor::ExportData(QString const& file) const
-{
-
-}
-
-QString ConfigVisitor::ReadIPFromFile(QString const& file) const
-{
-    return "";
 }
