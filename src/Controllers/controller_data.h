@@ -27,7 +27,7 @@ struct ControllerPort
 	QString protocol;
 	QString toString() const
 	{
-		return QString("Port:%1,Pixels:%2,Start Channel:%3,Start Universe:%4,Start Nulls:%5,Group Count:%6,Brightness:%7,Reverse:%8,Gamma:%9")
+		return QString("Port: %1, Pixels: %2, Start Channel: %3, Start Universe: %4, Start Nulls: %5, Group Count: %6, Brightness: %7, Reverse: %8, Gamma: %9")
 			.arg(port).arg(pixels).arg(startChannel).arg(startUniverse).arg(startNulls).arg(group).arg(brightness).arg(reverse).arg(gamma);
 	}
 };
@@ -42,8 +42,8 @@ struct ControllerInput
 	
 	QString toString() const
 	{
-		return QString("Type:%1, Channel Size:%2, Start Universe:%3, Universe Count:%4, Start Channel:%5")
-			.arg(type).arg(channels).arg(startUniverse).arg(universeCount).arg(startChannel);
+		return QString("Type: %1, Start Universe: %2, Start Channel: %3 Size: %4 Universe Count: %5")
+			.arg(type).arg(startUniverse).arg(startChannel).arg(channels).arg(universeCount);
 	}
 };
 
@@ -59,7 +59,7 @@ struct ControllerData
 	std::vector<ControllerInput> inputs;
 	QString toString() const
 	{
-		return QString("Name:%1,IP Address:%2,Mode:%3,Firmware:%4")
+		return QString("Name:%1, IP Address:%2, Mode:%3, Firmware:%4")
 			.arg(name).arg(ip).arg(mode).arg(firmware);
 	}
 

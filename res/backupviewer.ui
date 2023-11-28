@@ -53,7 +53,7 @@
       </column>
       <column>
        <property name="text">
-        <string>End Channel</string>
+        <string>Protocol</string>
        </property>
       </column>
       <column>

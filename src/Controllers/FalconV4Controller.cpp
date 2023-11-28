@@ -88,4 +88,18 @@ QString FalconV4Controller::DecodeColorOrder(int color) const
 	}
 	return "RGB";
 }
+
+QString FalconV4Controller::DecodeInputType(QString const& type) const
+{
+	if (type == "e")
+	{
+		return "E1.31";
+	}
+	if (type == "a")
+	{
+		return "ArtNet";
+	}
+	
+	return "Unknown";
+}
  

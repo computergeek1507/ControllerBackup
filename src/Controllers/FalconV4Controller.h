@@ -23,6 +23,7 @@ struct FalconV4Controller : BaseController
 	[[nodiscard]] QString DecodeMode(int mode) const;
 	[[nodiscard]] QString DecodePixelProtocol(int protocol) const;
 	[[nodiscard]] QString DecodeColorOrder(int color) const;
+	[[nodiscard]] QString DecodeInputType(QString const& type) const;
 };
 
 #endif

@@ -110,3 +110,13 @@ float FalconV3Controller::DecodeGamma(int gammaCode) const {
 	return 1.0f;
 }
 
+QString FalconV3Controller::DecodeInputType(int type) const
+{
+	switch (type) {
+	case 0: return "E1.31";
+	case 1: return "ArtNet";
+	default: break;
+	}
+	return "Unknown";
+}
+

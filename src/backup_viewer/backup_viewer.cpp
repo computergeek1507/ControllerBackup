@@ -5,7 +5,7 @@
 #include "../Controllers/controller_data.h"
 
 
-enum class StringPortColumn : int { Port = 0, Desp, Pixels, StartChan, EndChan, ColerOrder, StartNulls, EndNulls, Brightness, Gamma, Group, Reverse};
+enum class StringPortColumn : int { Port = 0, Desp, Pixels, StartChan, Protocol, ColorOrder, StartNulls, EndNulls, Brightness, Gamma, Group, Reverse};
 
 bool BackUpViewer::Load(BaseController * controller, QWidget* parent)
 {
@@ -26,7 +26,7 @@ BackUpViewer::BackUpViewer(BaseController * controller, QWidget* parent ) :
 
 	m_ui.splitter->setStretchFactor(0, 1);
 	m_ui.splitter->setStretchFactor(1, 3);
-	m_ui.twStrings->hideColumn(std::to_underlying(StringPortColumn::EndChan));
+	//m_ui.twStrings->hideColumn(std::to_underlying(StringPortColumn::EndChan));
 
 	std::unique_ptr<ConfigVisitor> visitor = std::make_unique< ConfigVisitor>();
 
@@ -48,7 +48,7 @@ void BackUpViewer::LoadData(ControllerData const& controller)
 	m_ui.lsInfo->addItem("Mode: " + controller.mode);
 	m_ui.lsInfo->addItem("Firmware: " + controller.firmware);
 
-
+	m_ui.lsInfo->addItem("Inputs" );
 	for (auto const& in : controller.inputs)
 	{
 		m_ui.lsInfo->addItem(in.toString());
@@ -82,11 +82,6 @@ void BackUpViewer::LoadData(ControllerData const& controller)
 		}
 	};
 
-	auto SetItemEndChannel = [&](int row, StringPortColumn col, uint64_t startUniverse, uint64_t startChan, QString const& color)
-	{
-		//SetItem(row, col, QString::number(val));
-	};
-
 	m_ui.twStrings->setRowCount(static_cast<int>(controller.pixelports.size()));
 
 	int idx{ 0 };
@@ -96,8 +91,8 @@ void BackUpViewer::LoadData(ControllerData const& controller)
 		SetItem(idx, StringPortColumn::Desp, c.name );
 		SetItemInt(idx, StringPortColumn::Pixels, c.pixels);
 		SetItemStartChannel(idx, StringPortColumn::StartChan, c.startUniverse, c.startChannel);
-		SetItemEndChannel(idx, StringPortColumn::EndChan, c.startUniverse, c.startChannel, c.colorOrder);
-		SetItem(idx, StringPortColumn::ColerOrder, c.colorOrder);
+		SetItem(idx, StringPortColumn::Protocol, c.protocol);
+		SetItem(idx, StringPortColumn::ColorOrder, c.colorOrder);
 		SetItemInt(idx, StringPortColumn::StartNulls, c.startNulls);
 		SetItemInt(idx, StringPortColumn::EndNulls, c.endNulls);
 		SetItemInt(idx, StringPortColumn::Brightness, c.brightness);

@@ -44,7 +44,7 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
                 input.startUniverse = universe.toInt();
                 input.universeCount = 1;
                 input.startChannel = sc.toInt();
-                //input.type = stringsObj.value("p").toString();
+                input.type = c->DecodeInputType(element.attribute("t").toInt());
                 configData.inputs.push_back(input);
             }
             node = node.nextSibling();
@@ -126,13 +126,18 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
     QJsonValue strings = topString.toObject().value("A");
     if (strings.type() == QJsonValue::Array)
     {
+        QString lastprotocol = "ws2811";
         QJsonArray stringsArray = strings.toArray();
         for (int i = 0; i < stringsArray.count(); i++) 
         {
             QJsonValue stringsChild = stringsArray.at(i);
-            if (stringsChild.type() == QJsonValue::Object) 
+            if (stringsChild.type() == QJsonValue::Object)
             {
                 QJsonObject stringsObj = stringsChild.toObject();
+                if ((i + 1) % 16 == 1)//only read protocol at 1, 17, 33
+                {
+                    lastprotocol = c->DecodePixelProtocol(stringsObj.value("l").toInt());
+                }
                 ControllerPort port;
                 port.port = stringsObj.value("p").toInt() + 1;
                 port.startUniverse = stringsObj.value("u").toInt();
@@ -146,7 +151,7 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
                 port.name = stringsObj.value("nm").toString();
                 port.gamma = stringsObj.value("g").toInt()/10.0;
                 port.colorOrder = c->DecodeColorOrder(stringsObj.value("o").toInt());
-                port.protocol = c->DecodePixelProtocol(stringsObj.value("l").toInt());
+                port.protocol = lastprotocol;
                 configData.pixelports.push_back(port);
             }
         }
@@ -167,7 +172,7 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
                 input.channels = stringsObj.value("c").toInt();
                 input.startUniverse = stringsObj.value("u").toInt();
                 input.universeCount = stringsObj.value("uc").toInt();
-                input.type = stringsObj.value("p").toString();
+                input.type = c->DecodeInputType(stringsObj.value("p").toString());
                 configData.inputs.push_back(input);
             }
         }
@@ -214,6 +219,7 @@ void ConfigVisitor::ReadConfig(FPPController* c)
                             input.channels = uniObj.value("channelCount").toInt();
                             input.startUniverse = uniObj.value("id").toInt();
                             input.universeCount = uniObj.value("universeCount").toInt();
+                            input.startChannel = uniObj.value("startChannel").toInt();
                             input.type = c->DecodeInputType(uniObj.value("type").toInt());
                             configData.inputs.push_back(input);
                         }
@@ -222,7 +228,6 @@ void ConfigVisitor::ReadConfig(FPPController* c)
             }
         }
     }
-
 
     data = ReadFile(c->GetBackupFile(BackupType::OuputPixels));
     QJsonDocument strings_Json = QJsonDocument::fromJson(data);
@@ -234,43 +239,63 @@ void ConfigVisitor::ReadConfig(FPPController* c)
         QJsonArray outputArray = channelOuputs.toArray();
         for (int j = 0; j < outputArray.count(); j++)
         {
-            QJsonValue stringsChild = outputArray.at(j);
-            if (stringsChild.type() == QJsonValue::Object)
+            QString protocol = "ws281x";
+            QJsonValue outputChild = outputArray.at(j);
+            if (outputChild.type() == QJsonValue::Object)
             {
-                QJsonObject stringsObj = stringsChild.toObject();
-                ControllerPort port;
-                port.port = stringsObj.value("startChannel").toInt(); + 1;
-                port.brightness = 30;
-                port.protocol = "ws2811";
-                QJsonValue vitualString = stringsObj.value("virtualStrings");
-                if (vitualString.type() == QJsonValue::Array)
+                QJsonObject outputObj = outputChild.toObject();
+                if (outputObj.contains("pixelTiming"))
                 {
-                    QJsonArray vsArray = vitualString.toArray();
-                    for (int i = 0; i < vsArray.count(); i++)
+                    if (outputObj.value("pixelTiming").toInt() == 1)
                     {
-                        QJsonValue vsChild = vsArray.at(i);
-                        QJsonObject vsObj = vsChild.toObject();
-                        if (i == 0)
-                        {
-                            port.startChannel = vsObj.value("startChannel").toInt();
-                            port.name = vsObj.value("description").toString();
-                            //port.startUniverse = vsObj.value("su").toInt();
-                            port.startNulls = vsObj.value("nullNodes").toInt();
-                            port.endNulls = vsObj.value("endNulls").toInt();
-                            port.reverse = vsObj.value("reverse").toBool();
-                            port.brightness = vsObj.value("brightness").toInt();
-                            port.gamma = vsObj.value("gamma").toDouble();
-                            port.colorOrder = vsObj.value("colorOrder").toString();
-                            port.group = vsObj.value("groupCount").toInt();
-                        }
-
-                        port.pixels += vsObj.value("pixelCount").toInt();
+                        protocol = "1903";
                     }
                 }
-                configData.pixelports.push_back(port);
+                QJsonValue outputs = outputObj.value("outputs");
+                if (outputs.type() == QJsonValue::Array)
+                {
+                    QJsonArray outputArray = outputs.toArray();
+                    for (int k = 0; k < outputArray.count(); k++)
+                    {
+                        QJsonValue stringChild = outputArray.at(k);
+                        QJsonObject stringsObj = stringChild.toObject();
+                        ControllerPort port;
+                        port.brightness = 30;
+                        port.protocol = protocol;
+                        port.port = stringsObj.value("portNumber").toInt() + 1;
+                        QJsonValue vitualString = stringsObj.value("virtualStrings");
+                        if (vitualString.type() == QJsonValue::Array)
+                        {
+                            QJsonArray vsArray = vitualString.toArray();
+                            for (int i = 0; i < vsArray.count(); i++)
+                            {
+                                QJsonValue vsChild = vsArray.at(i);
+                                QJsonObject vsObj = vsChild.toObject();
+                                if (i == 0)
+                                {
+                                    port.startChannel = vsObj.value("startChannel").toInt() + 1;
+                                    port.name = vsObj.value("description").toString();
+                                    //port.startUniverse = vsObj.value("su").toInt();
+                                    port.startNulls = vsObj.value("nullNodes").toInt();
+                                    port.endNulls = vsObj.value("endNulls").toInt();
+                                    port.reverse = vsObj.value("reverse").toBool();
+                                    port.brightness = vsObj.value("brightness").toInt();
+                                    port.gamma = vsObj.value("gamma").toString().toDouble();
+                                    port.colorOrder = vsObj.value("colorOrder").toString();
+                                    port.group = vsObj.value("groupCount").toInt();
+                                }
+                                port.pixels += vsObj.value("pixelCount").toInt();
+                            }
+                        }
+                        configData.pixelports.push_back(port);
+                    }
+                }
             }
         }
     }
+
+    configData.ip = c->IP;
+    controllers.push_back(configData);
 }
 
 void ConfigVisitor::ReadConfig(GeniusController* c)
@@ -306,6 +331,7 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
                 port.port = i + 1;
                 port.brightness = 30;
                 port.protocol = "ws2811";
+                port.colorOrder = "RGB";
                 QJsonValue vitualString = stringsObj.value("virtual_strings");
                 if (vitualString.type() == QJsonValue::Array)
                 {
@@ -361,25 +387,35 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
             }
         }
     }
-
-    QJsonValue inputs = rootObj.value("inputs");
-    if (inputs.type() == QJsonValue::Array)
-    {
-        QJsonArray inputsArray = inputs.toArray();
-        for (int i = 0; i < inputsArray.count(); i++)
+    bool use_universes = system.toObject().value("manage_outputs_by_universe").toBool();
+    if (use_universes) {
+        QJsonValue inputs = rootObj.value("inputs");
+        if (inputs.type() == QJsonValue::Array)
         {
-            QJsonValue inputChild = inputsArray.at(i);
-            if (inputChild.type() == QJsonValue::Object)
+            QJsonArray inputsArray = inputs.toArray();
+            for (int i = 0; i < inputsArray.count(); i++)
             {
-                QJsonObject stringsObj = inputChild.toObject();
-                ControllerInput input;
-                input.channels = stringsObj.value("channels_per_universe").toInt();
-                input.startUniverse = stringsObj.value("start_universe").toInt();
-                input.universeCount = stringsObj.value("number_of_universes").toInt();
-                //input.type = stringsObj.value("p").toString();
-                configData.inputs.push_back(input);
+                QJsonValue inputChild = inputsArray.at(i);
+                if (inputChild.type() == QJsonValue::Object)
+                {
+                    QJsonObject stringsObj = inputChild.toObject();
+                    ControllerInput input;
+                    input.channels = stringsObj.value("channels_per_universe").toInt();
+                    input.startUniverse = stringsObj.value("start_universe").toInt();
+                    input.startChannel = stringsObj.value("start_channel").toInt();
+                    input.universeCount = stringsObj.value("number_of_universes").toInt();
+                    input.type = configData.mode;
+                    configData.inputs.push_back(input);
+                }
             }
         }
+    }
+    else 
+    {
+        ControllerInput input;
+        input.startChannel = system.toObject().value("start_channel").toInt();
+        input.type = configData.mode;
+        configData.inputs.push_back(input);
     }
     configData.ip = c->IP;
     //ReadIPFromFile(c->FilePath);

@@ -23,6 +23,7 @@ struct FalconV3Controller : BaseController
 	[[nodiscard]] QString DecodeColorOrder(int color) const;
 	[[nodiscard]] int DecodeBrightness(int brightnessCode) const;
 	[[nodiscard]] float DecodeGamma(int gammaCode) const;
+	[[nodiscard]] QString DecodeInputType(int type) const;
 };
 
 #endif
