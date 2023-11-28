@@ -93,7 +93,6 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
     
     //QString universe = nameElement.attribute("u");
     configData.ip = c->IP;
-    //ReadIPFromFile(c->FilePath);
     controllers.push_back(configData);
 }
 
@@ -112,8 +111,6 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
 
     QJsonValue name = controller.toObject().value("N");
     configData.name = name.toString();
-
-    //QJsonValue ip = controller.toObject().value("I");
     configData.ip = c->IP;
 
     QJsonValue version = controller.toObject().value("V");
@@ -177,14 +174,7 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
             }
         }
     }
-    if (!configData.ip.isEmpty()) 
-    {
-        controllers.push_back(configData);
-    }
-    else 
-    {
-        qDebug() << c->GetBackupFile() << "was invalid";
-    }
+    controllers.push_back(configData);
 }
 
 void ConfigVisitor::ReadConfig(FPPController* c)
@@ -418,15 +408,7 @@ void ConfigVisitor::ReadConfig(GeniusController* c)
         configData.inputs.push_back(input);
     }
     configData.ip = c->IP;
-    //ReadIPFromFile(c->FilePath);
-    if (!configData.ip.isEmpty())
-    {
-        controllers.push_back(configData);
-    }
-    else
-    {
-        qDebug() << c->GetBackupFile() << "was invalid";
-    }
+    controllers.push_back(configData);
 }
 
 void ConfigVisitor::ReadConfig(WLEDController* c)
@@ -474,7 +456,6 @@ void ConfigVisitor::ReadConfig(WLEDController* c)
         }
     }
 
-
     QJsonValue inputf = rootObj.value("if");
 
     QJsonValue live = inputf.toObject().value("live");
@@ -495,7 +476,6 @@ void ConfigVisitor::ReadConfig(WLEDController* c)
     configData.name = name.toString();
 
     configData.ip = c->IP;
-    //ReadIPFromFile(c->FilePath);
     controllers.push_back(configData);
 }
 
