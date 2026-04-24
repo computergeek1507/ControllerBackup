@@ -3,12 +3,14 @@
 
 #include <QString>
 #include <QObject>
-#include <QDomDocument>
+
 
 #include "spdlog/spdlog.h"
 #include "spdlog/common.h"
 
 #include <memory>
+
+#include "pugixml.hpp"
 #include <vector>
 
 class xLightsNetworks : public QObject
@@ -29,7 +31,7 @@ public:
 private:
 	std::shared_ptr<spdlog::logger> m_logger{ nullptr };
 
-	QDomDocument xgbnetworks_doc;
+	pugi::xml_document xgbnetworks_doc;
 	QStringList xgbnetworks_data;
 };
 

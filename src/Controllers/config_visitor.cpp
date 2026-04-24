@@ -13,7 +13,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QDomDocument>
+#include "pugixml.hpp"
 
 #include <cmath>
 
@@ -23,69 +23,65 @@ void ConfigVisitor::ReadConfig(FalconV3Controller* c)
     auto data = ReadFile(c->GetBackupFile());
 
     //load the file
-    QDomDocument doc;
-    doc.setContent(data);
-    QDomElement docElem = doc.documentElement();
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_buffer(data.constData(), data.size());
+    if (!result) {
+        return;
+    }
+    pugi::xml_node docElem = doc.document_element();
 
-    QDomElement universeElement = docElem.firstChildElement("universes");
-    if (!universeElement.isNull()) {
-        QString absolute = universeElement.attribute("a");
+    pugi::xml_node universeElement = docElem.child("universes");
+    if (universeElement) {
+        QString absolute = QString::fromUtf8(universeElement.attribute("a").value());
         configData.absoluteStartAddress = absolute.toInt();
-        QDomNode node = universeElement.firstChild();
-        while (!node.isNull()) {
-            QDomElement element = node.toElement();
-            if (!element.isNull()) {
-                //const QString tagName(element.tagName());
-                QString universe = element.attribute("u");
-                QString lenth = element.attribute("l");
-                QString sc = element.attribute("s");
-                ControllerInput input;
-                input.channels = lenth.toInt();
-                input.startUniverse = universe.toInt();
-                input.universeCount = 1;
-                input.startChannel = sc.toInt();
-                input.type = c->DecodeInputType(element.attribute("t").toInt());
-                configData.inputs.push_back(input);
+        for (pugi::xml_node node : universeElement.children())
+        {
+            QString universe = QString::fromUtf8(node.attribute("u").value());
+            QString lenth = QString::fromUtf8(node.attribute("l").value());
+            QString sc = QString::fromUtf8(node.attribute("s").value());
+            ControllerInput input;
+            input.channels = lenth.toInt();
+            input.startUniverse = universe.toInt();
+            input.universeCount = 1;
+            input.startChannel = sc.toInt();
+            pugi::xml_attribute tAttr = node.attribute("t");
+            if (tAttr) {
+                input.type = c->DecodeInputType(QString::fromUtf8(tAttr.value()).toInt());
             }
-            node = node.nextSibling();
+            configData.inputs.push_back(input);
         }
     }
 
-    QDomElement stringsElement = docElem.firstChildElement("strings");
-    if (!stringsElement.isNull()) {
-        QDomNode node = stringsElement.firstChild();
-        while (!node.isNull()) {
-            QDomElement element = node.toElement();
-            if (!element.isNull()) {
-                //const QString tagName(element.tagName());
-                QString name = element.attribute("y");
-                QString port = element.attribute("p");
-                QString uni = element.attribute("u");
-                QString pixels = element.attribute("c");
-                QString us = element.attribute("us");
-                QString start = element.attribute("s");
-                 ControllerPort pixelport;
-                pixelport.port = port.toInt() + 1;
-                pixelport.pixels = pixels.toInt();
-                pixelport.name = name;
-                pixelport.startNulls = element.attribute("n").toInt();
-                pixelport.reverse = (element.attribute("d").toInt());
-                pixelport.gamma = c->DecodeGamma(element.attribute("ga").toInt());
-                pixelport.brightness = c->DecodeBrightness(element.attribute("b").toInt());
-                pixelport.colorOrder = c->DecodeColorOrder(element.attribute("o").toInt());
-                pixelport.protocol = c->DecodePixelProtocol(element.attribute("t").toInt());
-                pixelport.group = element.attribute("g").toInt();
-                //pixelport.universeCount = 1;
-                if (us == "0") {
-                    pixelport.startChannel = start.toInt();
-                } else {
-                    pixelport.startUniverse = uni.toInt();
-                    pixelport.startChannel = us.toInt();
-                }
-                //input.type = stringsObj.value("p").toString();
-                configData.pixelports.push_back(pixelport);
+    pugi::xml_node stringsElement = docElem.child("strings");
+    if (stringsElement) {
+        for (pugi::xml_node node : stringsElement.children())
+        {
+            QString name = QString::fromUtf8(node.attribute("y").value());
+            QString port = QString::fromUtf8(node.attribute("p").value());
+            QString uni = QString::fromUtf8(node.attribute("u").value());
+            QString pixels = QString::fromUtf8(node.attribute("c").value());
+            QString us = QString::fromUtf8(node.attribute("us").value());
+            QString start = QString::fromUtf8(node.attribute("s").value());
+            ControllerPort pixelport;
+            pixelport.port = port.toInt() + 1;
+            pixelport.pixels = pixels.toInt();
+            pixelport.name = name;
+            pixelport.startNulls = QString::fromUtf8(node.attribute("n").value()).toInt();
+            pixelport.reverse = QString::fromUtf8(node.attribute("d").value()).toInt();
+            pixelport.gamma = c->DecodeGamma(QString::fromUtf8(node.attribute("ga").value()).toInt());
+            pixelport.brightness = c->DecodeBrightness(QString::fromUtf8(node.attribute("b").value()).toInt());
+            pixelport.colorOrder = c->DecodeColorOrder(QString::fromUtf8(node.attribute("o").value()).toInt());
+            pixelport.protocol = c->DecodePixelProtocol(QString::fromUtf8(node.attribute("t").value()).toInt());
+            pixelport.group = QString::fromUtf8(node.attribute("g").value()).toInt();
+            //pixelport.universeCount = 1;
+            if (us == "0") {
+                pixelport.startChannel = start.toInt();
+            } else {
+                pixelport.startUniverse = uni.toInt();
+                pixelport.startChannel = us.toInt();
             }
-            node = node.nextSibling();
+            //input.type = stringsObj.value("p").toString();
+            configData.pixelports.push_back(pixelport);
         }
     }
     
@@ -131,7 +127,7 @@ void ConfigVisitor::ReadConfig(FalconV4Controller* c)
             if (stringsChild.type() == QJsonValue::Object)
             {
                 QJsonObject stringsObj = stringsChild.toObject();
-                if ((i + 1) % 16 == 1)//only read protocol at 1, 17, 33
+                if ((i + 1) % 16 == 1)//only read protocol at ports 1, 17, 33
                 {
                     lastprotocol = c->DecodePixelProtocol(stringsObj.value("l").toInt());
                 }

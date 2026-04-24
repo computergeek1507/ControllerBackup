@@ -10,7 +10,8 @@
 #include "config_visitor.h"
 #include "../xlights/xlights_update.h"
 
-#include <QtXml>
+#include "pugixml.hpp"
+#include <QDir>
 #include <QFile>
 #include "backup_file.h"
 
@@ -74,61 +75,77 @@ void ControllerManager::UpdateXLightsController(QString const& folder)
 
 bool ControllerManager::LoadControllers(QString const& outputConfig, QString const& backupFolder)
 {
-	QDomDocument xmlNetworks;
-	QFile f(outputConfig + QDir::separator() + "xlights_networks.xml");
-	if (!f.open(QIODevice::ReadOnly))
+	pugi::xml_document xmlNetworks;
+	QString const networksFile = outputConfig + QDir::separator() + "xlights_networks.xml";
+	if (!QFile::exists(networksFile))
 	{
+		m_logger->warn("xlights_networks.xml not found in {}", outputConfig.toStdString());
 		return false;
 	}
-	m_showdir = outputConfig;
-	xmlNetworks.setContent(&f);
-	f.close();
+	try {
+		m_showdir = outputConfig;
 
-	QDomElement rootXML = xmlNetworks.documentElement();
+		pugi::xml_parse_result result = xmlNetworks.load_file(networksFile.toStdString().c_str());
 
-	QString const Type = rootXML.tagName();
-	
-	for (QDomElement controllerXML = rootXML.firstChildElement("Controller"); !controllerXML.isNull(); controllerXML = controllerXML.nextSiblingElement("Controller"))
-	{
-		bool const active = controllerXML.attribute("ActiveState", "Active") == "Active";
-		QString const name = controllerXML.attribute("Name", "");
-		QString const type = controllerXML.attribute("Type", "");
-		QString const vendor = controllerXML.attribute("Vendor", "");
-		QString const model = controllerXML.attribute("Model", "");
-		QString const ipAddress = controllerXML.attribute("IP", "");
-		if ("Falcon" == vendor && (model == "F16V4" || model == "F48V4" 
-			|| model == "F16V5" || model == "F48V5"))
+
+		if (!result)
 		{
-			m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
+			m_logger->warn("Failed to parse xlights_networks.xml: {}", result.description());
+			return false;
 		}
-		else if ("Falcon" == vendor && (model == "F16V3" || model == "F48"))
+
+		pugi::xml_node rootXML = xmlNetworks.document_element();
+
+		QString const Type = QString::fromUtf8(rootXML.name());
+
+		for (pugi::xml_node controllerXML : rootXML.children("Controller"))
 		{
-			m_controllers.emplace_back(std::make_unique<FalconV3Controller>(name, ipAddress));
+			pugi::xml_attribute activeAttr = controllerXML.attribute("ActiveState");
+			bool const active = QString::fromUtf8(activeAttr.value()).isEmpty() ? true : QString::fromUtf8(activeAttr.value()) == "Active";
+			QString const name = QString::fromUtf8(controllerXML.attribute("Name").value());
+			QString const type = QString::fromUtf8(controllerXML.attribute("Type").value());
+			QString const vendor = QString::fromUtf8(controllerXML.attribute("Vendor").value());
+			QString const model = QString::fromUtf8(controllerXML.attribute("Model").value());
+			QString const ipAddress = QString::fromUtf8(controllerXML.attribute("IP").value());
+			if ("Falcon" == vendor && (model == "F16V4" || model == "F48V4"
+				|| model == "F16V5" || model == "F48V5"))
+			{
+				m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
+			}
+			else if ("Falcon" == vendor && (model == "F16V3" || model == "F48"))
+			{
+				m_controllers.emplace_back(std::make_unique<FalconV3Controller>(name, ipAddress));
+			}
+			else if ("FPP" == vendor || "ScottNation" == vendor || "KulpLights" == vendor
+				|| "Wallys Lights" == vendor || "Hanson Electronics" == vendor || "MICROCYB" == vendor)
+			{
+				m_controllers.emplace_back(std::make_unique<FPPController>(name, ipAddress, vendor, model));
+			}
+			else if ("Experience Lights" == vendor || "Mattos Designs" == vendor)
+			{
+				m_controllers.emplace_back(std::make_unique<GeniusController>(name, ipAddress));
+			}
+			else if ("WLED" == vendor)
+			{
+				m_controllers.emplace_back(std::make_unique<WLEDController>(name, ipAddress));
+			}
+			else
+			{
+				m_logger->warn("Unsupported Controller type: {}", vendor.toStdString());
+				//unsupported type
+				m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
+			}
 		}
-		else if ("FPP" == vendor || "ScottNation" == vendor || "KulpLights" == vendor 
-			|| "Wallys Lights" == vendor || "Hanson Electronics" == vendor || "MICROCYB" == vendor)
-		{
-			m_controllers.emplace_back(std::make_unique<FPPController>(name, ipAddress, vendor, model));
-		}
-		else if ("Experience Lights" == vendor || "Mattos Designs" == vendor)
-		{
-			m_controllers.emplace_back(std::make_unique<GeniusController>(name, ipAddress));
-		}
-		else if ("WLED" == vendor)
-		{
-			m_controllers.emplace_back(std::make_unique<WLEDController>(name, ipAddress));
-		}
-		else
-		{
-			m_logger->warn("Unsupported Controller type: {}", vendor.toStdString());
-			//unsupported type
-			m_controllers.emplace_back(std::make_unique<FalconV4Controller>(name, ipAddress));
-		}
+		LookForBackups(backupFolder);
+		emit ReloadSetFolder(outputConfig);
+		emit ReloadControllers();
+		return true;
 	}
-	LookForBackups(backupFolder);
-	emit ReloadSetFolder(outputConfig);
-	emit ReloadControllers();
-	return true;
+	catch(const std::exception& e)
+	{
+		m_logger->warn("Exception caught while loading controllers: {}", e.what());
+		return false;
+	}
 }
 
 

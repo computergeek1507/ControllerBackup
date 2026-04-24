@@ -13,19 +13,19 @@ xLightsRGBEffects::xLightsRGBEffects(QObject* parent) :
 
 bool xLightsRGBEffects::LoadXML(QString const& xgbEffects)
 {
+    //	//xlights_rgbeffects_pre2026.04.xml
     QFile file(xgbEffects);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         m_logger->warn("Failed to Open xLights XRB Effects File");
         return false;
     }
-    QString errorStr;
-    int errorLine;
-    int errorColumn;
-    if (!rgbeffects_doc.setContent(&file, true, &errorStr, &errorLine, &errorColumn))
+    QByteArray xmlData = file.readAll();
+    pugi::xml_parse_result result = rgbeffects_doc.load_buffer(xmlData.constData(), xmlData.size());
+    if (!result)
     {
         m_logger->warn("Failed to Parse xLights XRB Effects File");
-        m_logger->warn("Line{}:Col{} {}", errorLine, errorColumn, errorStr.toStdString());
+        m_logger->warn("Offset: {} Error: {}", result.offset, result.description());
         file.close();
         return false;
     }
@@ -148,21 +148,20 @@ bool xLightsRGBEffects::SetModelControllerChain(QString const& model, QString co
 
 int xLightsRGBEffects::GetModelControllerPort(QString const& model) const
 {
-    auto models = rgbeffects_doc.elementsByTagName("model");
-    for (int i = 0; i < models.size(); ++i)
-    {
-        QDomElement domElement = models.at(i).toElement();
-        QDomAttr attribute = domElement.attributeNode("name");
-        if (attribute.value() == model) {
-            //if (!domElement.firstChild().hasAttributes())
-            {
-                //domElement.firstChildElement();
+    pugi::xml_node root = rgbeffects_doc.document_element();
     
-                auto name = domElement.firstChildElement("ControllerConnection").tagName();
-                //nodeTag.setTagName("new_amazing_tag_name");
-                QString sport = domElement.firstChildElement("ControllerConnection").attribute("Port", "-1");
-                return sport.toInt();
+    for (pugi::xml_node modelNode : root.children("model"))
+    {
+        pugi::xml_attribute nameAttr = modelNode.attribute("name");
+        if (nameAttr && QString::fromUtf8(nameAttr.value()) == model) {
+            pugi::xml_node connNode = modelNode.child("ControllerConnection");
+            if (connNode) {
+                pugi::xml_attribute portAttr = connNode.attribute("Port");
+                if (portAttr) {
+                    return QString::fromUtf8(portAttr.value()).toInt();
+                }
             }
+            return -1;
         }
     }
     return -1;
@@ -201,34 +200,33 @@ bool xLightsRGBEffects::SetModelController(QString const& model, QString const& 
 QStringList xLightsRGBEffects::GetModels() const
 {
     QStringList modelNames;
-    auto models = rgbeffects_doc.elementsByTagName("model");
-
-    for (int i = 0; i < models.size(); ++i)
+    pugi::xml_node root = rgbeffects_doc.document_element();
+    
+    for (pugi::xml_node model : root.children("model"))
     {
-        QDomElement domElement = models.at(i).toElement();
-        QDomAttr attribute = domElement.attributeNode("name");
-        modelNames.append(attribute.value());
+        pugi::xml_attribute nameAttr = model.attribute("name");
+        if (nameAttr)
+        {
+            modelNames.append(QString::fromUtf8(nameAttr.value()));
+        }
     }
     return modelNames;
 }
 
 QMap<QString, QString> xLightsRGBEffects::GetModelSettings(QString const& model) const
 {
-    auto models = rgbeffects_doc.elementsByTagName("model");
     QMap<QString, QString> modelSettings;
-    for (int i = 0; i < models.size(); ++i)
+    pugi::xml_node root = rgbeffects_doc.document_element();
+    
+    for (pugi::xml_node modelNode : root.children("model"))
     {
-        QDomElement domElement = models.at(i).toElement();
-        QDomAttr attribute = domElement.attributeNode("name");
-        if (attribute.value() == model) {
-            //domElement.attributes("Controller", controller);
-            for (int i = 0; i < domElement.attributes().length(); ++i) {
-                auto inode = domElement.attributes().item(i);
-                auto attr = inode.toAttr();
-                //qDebug() << "Name: " << attr.name();
-                //qDebug() << "Value: " << attr.value();
-                modelSettings.insert(attr.name(), attr.value());
+        pugi::xml_attribute nameAttr = modelNode.attribute("name");
+        if (nameAttr && QString::fromUtf8(nameAttr.value()) == model) {
+            for (pugi::xml_attribute attr : modelNode.attributes())
+            {
+                modelSettings.insert(QString::fromUtf8(attr.name()), QString::fromUtf8(attr.value()));
             }
+            break;
         }
     }
     return modelSettings;

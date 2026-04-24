@@ -3,7 +3,7 @@
 
 #include <QStringList>
 #include <QObject>
-#include <QDomDocument>
+
 #include <QMap>
 
 #include "spdlog/spdlog.h"
@@ -11,6 +11,8 @@
 
 #include <memory>
 #include <vector>
+
+#include "pugixml.hpp"
 
 class xLightsRGBEffects : public QObject
 {
@@ -31,8 +33,11 @@ public:
 private:
 	std::shared_ptr<spdlog::logger> m_logger{ nullptr };
 
-	QDomDocument rgbeffects_doc;
+	pugi::xml_document rgbeffects_doc;
 	QStringList rgbeffects_data;
+
+	bool newTwentySixFormat{false};
+	int xmlVerion{ 0 };
 };
 
 #endif
